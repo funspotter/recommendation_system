@@ -208,7 +208,6 @@ public class Main {
 //		maintain.maintainRecTable();
 		
 		RecMaintenance maintain = new RecMaintenance();
-		
 		maintain.maintainRecTable();
 		
 //		HashMap<Integer, Long> userIdFaceId = new HashMap<Integer, Long>();

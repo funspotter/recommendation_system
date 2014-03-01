@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/API_lib"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/APITEST"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/REC_lib"/>
+	<classpathentry kind="lib" path="lib/jcommon-1.0.18.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.15.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/bliki-core-3.0.19.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/colt.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/commons-codec-1.8.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/commons-httpclient-3.0.1.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/commons-logging-1.1.3.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/concurrent.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/jblas-1.2.3.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/json-20090211.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/last.fm-bindings-0.1.0.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/ojalgo-34.0.jar"/>
+	<classpathentry kind="lib" path="/REC_lib/lib/weka.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move element &apos;LogTableTypes.java&apos; to &apos;API_lib/src/com.incredibles.data&apos;&#x0D;&#x0A;- Original project: &apos;REC_lib&apos;&#x0D;&#x0A;- Destination element: &apos;API_lib/src/com.incredibles.data&apos;&#x0D;&#x0A;- Original element: &apos;com.incredibles.reclib.LogTableTypes.java&apos;&#x0D;&#x0A;- Update references to refactored element" description="Move compilation unit" destination="=API_lib/src&lt;com.incredibles.data" element1="/src&lt;com.incredibles.reclib{LogTableTypes.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" patterns="*" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1392105234677" units="1" version="1.0"/>
+</session>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="APITEST">
+        <wb-resource deploy-path="/" source-path="/WebContent"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <dependent-module archiveName="API_lib.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/API_lib/API_lib">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="REC_lib.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/REC_lib/REC_lib">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="mysql-connector-java-5.1.25-bin.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/API_lib/lib/mysql-connector-java-5.1.25-bin.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jblas-1.2.3.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/jblas-1.2.3.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="bliki-core-3.0.19.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/bliki-core-3.0.19.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="commons-logging-1.0.4.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/commons-logging-1.0.4.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="commons-httpclient-3.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/commons-httpclient-3.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="junit-4.5.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/junit-4.5.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="commons-compress-1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/commons-compress-1.0.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="commons-lang-2.4.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/commons-lang-2.4.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="commons-codec-1.2.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/commons-codec-1.2.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="weka.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/weka.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="concurrent.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/concurrent.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="ojalgo-34.0.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/ojalgo-34.0.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="gson-2.2.4.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/API_lib/lib/gson-2.2.4.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="colt.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/colt.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="geocoder-java-0.15.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/API_lib/lib/geocoder-java-0.15.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="json-20090211.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/json-20090211.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="json-simple-1.1.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/REC_lib/lib/json-simple-1.1.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="joda-time-2.3.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/API_lib/lib/joda-time-2.3.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="joda-time-2.3-javadoc.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/API_lib/lib/joda-time-2.3-javadoc.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="APITEST"/>
+        <property name="java-output-path" value="/APITEST/build/classes"/>
+    </wb-module>
+</project-modules>

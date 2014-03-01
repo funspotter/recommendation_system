@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="REC_lib">
+        <wb-resource deploy-path="/" source-path="/src"/>
+        <dependent-module archiveName="jblas-1.2.3.jar" deploy-path="/" handle="module:/classpath/lib/REC_lib/lib/jblas-1.2.3.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="json-simple-1.1.1.jar" deploy-path="/" handle="module:/classpath/lib/REC_lib/lib/json-simple-1.1.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="json-20090211.jar" deploy-path="/" handle="module:/classpath/lib/REC_lib/lib/json-20090211.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="joda-time-2.3.jar" deploy-path="/" handle="module:/classpath/lib/API_lib/lib/joda-time-2.3.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="joda-time-2.3-javadoc.jar" deploy-path="/" handle="module:/classpath/lib/API_lib/lib/joda-time-2.3-javadoc.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

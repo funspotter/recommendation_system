@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="API_lib">
+        <wb-resource deploy-path="/" source-path="/src"/>
+        <dependent-module archiveName="gson-2.2.4.jar" deploy-path="/" handle="module:/classpath/lib/API_lib/lib/gson-2.2.4.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="mysql-connector-java-5.1.25-bin.jar" deploy-path="/" handle="module:/classpath/lib/API_lib/lib/mysql-connector-java-5.1.25-bin.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="geocoder-java-0.15.jar" deploy-path="/" handle="module:/classpath/lib/API_lib/lib/geocoder-java-0.15.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="joda-time-2.3-javadoc.jar" deploy-path="/" handle="module:/classpath/lib/API_lib/lib/joda-time-2.3-javadoc.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="joda-time-2.3.jar" deploy-path="/" handle="module:/classpath/lib/API_lib/lib/joda-time-2.3.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

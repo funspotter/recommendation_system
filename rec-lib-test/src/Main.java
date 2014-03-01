@@ -275,8 +275,6 @@ public class Main {
 		
 		
 		
-		
-		
 //		DavidCos dc = new DavidCos();
 //		String str=null;
 //		try {

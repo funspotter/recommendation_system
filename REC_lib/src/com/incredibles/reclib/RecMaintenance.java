@@ -220,6 +220,26 @@ public class RecMaintenance {
         return result;
     }
 	
+	/**Upload log for one user*/
+	public static void uploadComment(int UserId){
+		RecommenderDbService dbService2=null;
+		try {
+			dbService2 = RecommenderDbServiceCreator.createCloud();
+			dbService2.insertRecommendationLog("RecMaintain for: "+UserId, UserId);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (dbService2 != null) {
+				try {
+					dbService2.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/**ForAllUser: Maintain Rec Table. Upload newly created and delete old events.
 	* Update isIn flags in Events table.*/
 	public void maintainRecTable(){
@@ -255,6 +275,7 @@ public class RecMaintenance {
 			}
 			LinkedHashMap<Integer, Double> rankValues = sortByValue(UserRanks);
 			uploadUserRec(rankValues, UserId);	// upload new rank values for user
+			uploadComment(UserId);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("UserID kész: "+UserId +"HashMapSize:"+rankValues.size()+" time: "+dateFormat.format(date));

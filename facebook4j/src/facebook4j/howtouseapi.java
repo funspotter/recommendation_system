@@ -1,31 +1,77 @@
 package facebook4j;
 
-import facebook4j.auth.AccessToken;
+import com.restfb.Connection;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.FacebookClient.AccessToken;
+import com.restfb.types.Checkin;
+import com.restfb.types.Page;
+import com.restfb.types.Post;
+import com.restfb.types.User;
+
+
 
 public class howtouseapi {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		// Generate facebook instance.
-		Facebook facebook = new FacebookFactory().getInstance();
-		// Use default values for oauth app id.
-		facebook.setOAuthAppId("", "");
-		// Get an access token from: 
-		// https://developers.facebook.com/tools/explorer
-		// Copy and paste it below.
-		String accessTokenString = "CAACEdEose0cBABVSEfLdmPCVpIjZCTlce5alSf0DDfhGaJEzLfKB4Acl6TJN74lNTxUxVmZBSZBRq10hRUmjLcHWzgqRNeMiM6g3bbG86zx248S12ZAA3ojvt1dERfo3scIxKk2jnYWfqVZBCcc5wfChRS6cvZCbxDAipIRBpZAZCRoZA77YU6glarPzA7ZC2dElchJbaYo7ogIwZDZD";
-		AccessToken at = new AccessToken(accessTokenString);
-		// Set access token.
-		facebook.setOAuthAccessToken(at);
+		// DefaultFacebookClient is the FacebookClient implementation
+		// that ships with RestFB. You can customize it by passing in
+		// custom JsonMapper and WebRequestor implementations, or simply
+		// write your own FacebookClient instead for maximum control.
 
-		// We're done.
-		// Write some stuff to your wall.
-		try {
-			facebook.postStatusMessage("Wow, it works...");
-		} catch (FacebookException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	//	FacebookClient facebookClient = new DefaultFacebookClient(MY_ACCESS_TOKEN);
+
+		// It's also possible to create a client that can only access
+		// publicly-visible data - no access token required. 
+		// Note that many of the examples below will not work unless you supply an access token! 
+
+		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
+		String MY_APP_ID = "513927361994826";
+		AccessToken accessToken =
+		  new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+		
+		FacebookClient publicOnlyFacebookClient = new DefaultFacebookClient();
+
+		// Get added security by using your app secret:
+
+		String myaccesToken = "CAACEdEose0cBAOW0Njgemp3kRvpZAPvFOs2m6VZCb8bPPChzx3IPacanP9HJesRwHR2lwvDNMlidhmIaSTOjC4gZCzq7eSyDoep6nOQg57SfnCQYaX3M8Hj1H1hAAFdBRVg8jE5or3iq97ByDofzkuSi889DZAv1fPV5rETEsO5RqQRP6PIDZAznL4MpmJPN8wFgHHVQ0qQZDZD";
+		
+		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+		
+		User user = facebookClient.fetchObject("100001001552981", User.class);
+		Page page = facebookClient.fetchObject("Funspotter", Page.class);
+
+		System.out.println("User name: " + user.getName());
+		System.out.println("Page likes: " + page.getLikes());
+		
+		Connection<Checkin> mycheckin = facebookClient.fetchConnection("100001001552981/Checkins", Checkin.class);
+		//System.out.println("First item in my checkin: " + mycheckin.getData().get(0));
+		
+		for(int i=0; i<mycheckin.getData().size(); i++){
+			System.out.println("First item in my checkin: " + mycheckin.getData().get(i));
 		}
+		
+		Connection<User> myFriends = facebookClient.fetchConnection("me/friends", User.class);
+		Connection<Post> myFeed = facebookClient.fetchConnection("me/feed", Post.class);
+
+//		System.out.println("Count of my friends: " + myFriends.getData().size());
+//		System.out.println("First item in my feed: " + myFeed.getData().get(0));
+//		
+//		// Obtains an access token which can be used to perform Graph API operations
+//		// on behalf of an application instead of a user.
+//
+//		
+//
+//		System.out.println("My application access token: " + accessToken);
+//		
+//		
+//		FacebookClient facebookClient2 = new DefaultFacebookClient(myaccesToken, accessToken.getAccessToken());
+//		User user2 = facebookClient.fetchObject("me", User.class);
+//		Page page2 = facebookClient.fetchObject("Funspotter", Page.class);
+//		
+//		System.out.println("User name: " + user2.getName());
+//		System.out.println("Page likes: " + page2.getLikes());
+//		
 	}
 
 }

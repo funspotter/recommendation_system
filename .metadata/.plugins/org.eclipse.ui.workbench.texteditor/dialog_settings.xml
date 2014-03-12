@@ -2,8 +2,8 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="302" key="DIALOG_WIDTH"/>
-		<item value="77" key="DIALOG_Y_ORIGIN"/>
-		<item value="691" key="DIALOG_X_ORIGIN"/>
+		<item value="337" key="DIALOG_Y_ORIGIN"/>
+		<item value="805" key="DIALOG_X_ORIGIN"/>
 		<item value="399" key="DIALOG_HEIGHT"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
@@ -13,16 +13,16 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="updateIsinFlagForEvents" key="selection"/>
+		<item value="Upload" key="selection"/>
 		<list key="findhistory">
+			<item value="upload"/>
+			<item value="discriminator"/>
+			<item value="getRecPUser"/>
+			<item value="batch"/>
+			<item value="insertRecPV4"/>
 			<item value="updateIsinFlagForEvents"/>
 			<item value="getLegitNotinEventsIdFromDate"/>
 			<item value="uploadUserDiscriminatorRank"/>
-			<item value="getAllLikeForUserId"/>
-			<item value="main"/>
-			<item value="updateNewUserEventCaches"/>
-			<item value="getEventDiscriminatorFromDateV2"/>
-			<item value="countLegitEventsClick"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>

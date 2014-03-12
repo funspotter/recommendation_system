@@ -41,5 +41,6 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="/REC_lib/lib/json-20090211.jar"/>
 	<classpathentry exported="true" kind="lib" path="/REC_lib/lib/json-simple-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/REC_lib/lib/junit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

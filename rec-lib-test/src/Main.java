@@ -17,8 +17,10 @@ import org.jfree.ui.RefineryUtilities;
 import org.json.JSONException;
 
 import com.incredibles.data.Rec;
+import com.incredibles.reclib.CheckinFilter;
 import com.incredibles.reclib.DavidCos;
 import com.incredibles.reclib.DiscriminatorAndLike;
+import com.incredibles.reclib.DiscriminatorCategorization;
 import com.incredibles.reclib.EventReplacerV1;
 import com.incredibles.reclib.LikeWeighting;
 import com.incredibles.reclib.Reader;
@@ -107,7 +109,8 @@ public class Main {
 	
 		
 		
-		
+		DiscriminatorCategorization valami = new DiscriminatorCategorization();
+		valami.valami();
 		
 		
 		
@@ -207,8 +210,30 @@ public class Main {
 //		RecMaintenance maintain = new RecMaintenance();
 //		maintain.maintainRecTable();
 		
-		RecMaintenance maintain = new RecMaintenance();
-		maintain.maintainRecTable();
+//		RecMaintenance maintain = new RecMaintenance();
+//		maintain.maintainRecTable();
+		
+//		int UserId = 30;
+//		HashMap<Integer, Double> userRanks = null;
+//		RecommenderDbService dbService = null;
+//		try {
+//			dbService = RecommenderDbServiceCreator.createCloud();
+//			userRanks = dbService.getRecPUser(UserId);
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}finally {
+//			if (dbService != null) {
+//				try {
+//					dbService.close();
+//				} catch (SQLException | IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//		
+//		CheckinFilter valami = new CheckinFilter();
+//		userRanks = valami.setRankValuesWithCheckin(userRanks, UserId);
 		
 //		HashMap<Integer, Long> userIdFaceId = new HashMap<Integer, Long>();
 //		RecommenderDbService dbService = null;	

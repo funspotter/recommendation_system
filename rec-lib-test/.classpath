@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="/REC_lib/lib/last.fm-bindings-0.1.0.jar"/>
 	<classpathentry kind="lib" path="/REC_lib/lib/ojalgo-34.0.jar"/>
 	<classpathentry kind="lib" path="/REC_lib/lib/weka.jar"/>
+	<classpathentry exported="true" kind="lib" path="/REC_lib/lib/junit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

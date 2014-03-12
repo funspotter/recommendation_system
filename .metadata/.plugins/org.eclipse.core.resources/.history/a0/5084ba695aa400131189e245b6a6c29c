@@ -1,0 +1,72 @@
+package com.incredibles.reclib;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import junit.*;
+
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
+
+public class CheckinFilter {
+
+	/*Return users checkin place name*/
+	public List<String> getCheckins(int UserId){
+		List<String> checkins = null;
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			checkins = dbService.getUserCheckin(UserId);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return checkins;
+	}
+
+	/*Returns legit events places based in isIn flag*/
+	public HashMap<Integer, List<String>> getLegitEventsPlaceName(){
+		RecommenderDbService dbService = null;
+		HashMap<Integer, List<String>> eventPlaces = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			eventPlaces = dbService.getLegitEventsPlaceName();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return eventPlaces;
+	}
+
+	public void valami(){
+		 AhoCorasick tree = new AhoCorasick();
+	       tree.add("hello".getBytes(), "hello");
+	       tree.add("world".getBytes(), "world");
+	       tree.prepare();
+
+	       Iterator searcher = tree.search("hello world".getBytes());
+	       while (searcher.hasNext()) {
+	           SearchResult result = searcher.next();
+	           System.out.println(result.getOutputs());
+	           System.out.println("Found at index: " + result.getLastIndex());
+	       }
+	}
+}

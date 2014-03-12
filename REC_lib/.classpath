@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/API_lib"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/bliki-core-3.0.19.jar"/>
 	<classpathentry kind="lib" path="lib/colt.jar"/>
@@ -14,13 +20,9 @@
 	<classpathentry kind="lib" path="lib/last.fm-bindings-0.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/ojalgo-34.0.jar"/>
 	<classpathentry kind="lib" path="lib/weka.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/API_lib"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
-		<attributes>
-			<attribute name="owner.project.facets" value="java"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="/API_lib/lib/joda-time-2.3.jar"/>
 	<classpathentry kind="lib" path="/API_lib/lib/joda-time-2.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/junit.jar"/>
+	<classpathentry kind="lib" path="/facebook4j/lib/restfb-1.6.14.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

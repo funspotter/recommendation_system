@@ -1,0 +1,386 @@
+package com.incredibles.reclib;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.google.gson.JsonObject;
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.FacebookClient.AccessToken;
+import com.restfb.exception.FacebookException;
+import com.restfb.json.JsonException;
+import com.restfb.types.Event;
+import com.restfb.types.Place;
+
+public class DiscriminatorCategorization {
+
+	private class PlaceTag{
+		Long id;
+		String name;
+	}
+	
+	String cinemaList = "Cinema";
+	String exhibitionList = "Museum/Art Gallery";
+	String gastroList = "Food/Grocery, Restaurant/Café";
+	String musicList = "Concert Venue";
+	String sportList = "Attractions/Things to Do, Outdoor Gear/Sporting Goods, Sports Venue, Sports/Recreation/Activities";
+	String travelList = "Transport, Tours/Sightseeing, Spas/Beauty/Personal Care, Airport, Hotel, Landmark";
+	String partyList = "Club";
+	
+	/*Returns uncategorized events facebook and funspotter id*/
+	public HashMap<Long, Integer> getUncategorizedEventsIds(){
+		HashMap<Long, Integer> FacebookEventId = null;
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			FacebookEventId = dbService.getAllEventFacebookAndFunspotterId();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return FacebookEventId;
+	}
+	
+	/*First categorized based on the returned facebook place category*/
+	public String easyCategorizing(String FacebookCategory){
+		if(cinemaList.contains(FacebookCategory)){
+			return "Cinema";
+		}else if(exhibitionList.contains(FacebookCategory)){
+			return "Exhibition";
+		}else if(gastroList.contains(FacebookCategory)){
+			return "Gastro";
+		}else if(musicList.contains(FacebookCategory)){
+			return "Music";
+		}else if(sportList.contains(FacebookCategory)){
+			return "Sport";
+		}else if(travelList.contains(FacebookCategory)){
+			return "Travel";
+		}else if(partyList.contains(FacebookCategory)){
+			return "Party";
+		}else{
+			return null;
+		}
+	}
+	
+	/*MEGÍRNI TÁBLA ALAPJÁN. Returns CategoryList elements discriminator numbers*/
+	public HashMap<PlaceTag, HashMap<String, Integer>> getCategoryListNumbers(){
+		HashMap<PlaceTag, HashMap<String, Integer>> faszom = new HashMap<PlaceTag, HashMap<String, Integer>>();
+		return faszom;
+	}
+	
+	/*Updates the discriminator - number hashmaps*/
+	public void putDiscriminatorNumbersIntoHashMap(HashMap<String, Integer> discriminatorNumbers, String Discriminator){
+		if(discriminatorNumbers.isEmpty()){
+			discriminatorNumbers.put("Cinema", 0);
+			discriminatorNumbers.put("Exhibition", 0);
+			discriminatorNumbers.put("Festival", 0);
+			discriminatorNumbers.put("Gastro", 0);
+			discriminatorNumbers.put("Kid", 0);
+			discriminatorNumbers.put("Music", 0);
+			discriminatorNumbers.put("Sport", 0);
+			discriminatorNumbers.put("Theater", 0);
+			discriminatorNumbers.put("Travel", 0);
+			discriminatorNumbers.put("Party", 0);
+			discriminatorNumbers.put("Other", 0);
+			if(discriminatorNumbers.containsKey(Discriminator)){
+				discriminatorNumbers.put(Discriminator, 1);
+			}else{
+				System.out.println("ProblemInDiscNumberUpdate");
+			}
+		}else{
+			if(discriminatorNumbers.containsKey(Discriminator)){
+				Integer number = discriminatorNumbers.get(Discriminator);
+				discriminatorNumbers.put(Discriminator, number++);
+			}else{
+				System.out.println("ProblemInDiscNumberUpdate");
+			}
+		}
+	}
+	
+	/*Returns one place category, and fill the onePlaceCategory hashmap with categoryList elements*/
+	public String getFacebookData(Long FacebookId, HashMap<Long, String> onePlaceCategoryList){
+		Event event = null;
+		Place place = null;
+		String categoryString = null;
+		JSONArray categoryList = null;
+		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
+		String MY_APP_ID = "513927361994826";
+		AccessToken accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+		String EventFacebookId = FacebookId.toString();
+		try{
+			event = facebookClient.fetchObject(EventFacebookId, Event.class, Parameter.with("metadata", 1));
+			try{
+				place  = facebookClient.fetchObject(event.getVenue().getId(), Place.class, Parameter.with("metadata", 1));
+				try{
+					JSONObject category = null;
+					JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
+					JSONArray tomb = (JSONArray) valami.get("data");
+					System.out.println(tomb);
+					JSONObject valami2 = (JSONObject) tomb.get(0);
+					JSONObject valami3 = (JSONObject) valami2.get("to");
+					JSONArray tomb2 = (JSONArray) valami3.get("data");
+					category = (JSONObject) tomb2.get(0);
+					categoryString = category.get("category").toString();
+					categoryList = (JSONArray) category.get("category_list");
+					for(int i=0; i< categoryList.size(); i++){
+						JsonObject oneCategoryList = (JsonObject) categoryList.get(i);
+						Long id = oneCategoryList.get("id").getAsLong();
+						String oneCategoryListName= oneCategoryList.get("name").getAsString();
+						onePlaceCategoryList.put(id, oneCategoryListName);
+					}
+				}catch(NullPointerException | IOException | ParseException e){
+					System.out.println("problemWithJson");
+				}
+			}catch(FacebookException e){
+				System.out.println("NoPlaceInfo");
+			}
+		}catch(FacebookException e){
+			System.out.println("NoEventInfo");
+		}
+		return categoryString;
+	}
+	
+	/*Upload the newly categorized events discriminator into database*/
+	public void uploadEventDiscriminators(HashMap<Integer, String> newEventDiscriminator){
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			dbService.updateEventsDiscriminator(newEventDiscriminator);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/*MEGÍRNI ÚJ TÁBLA Upload all of the categoryList elements into table with the new discriminator numbers*/
+	public void uploadCategoryListElements(HashMap<PlaceTag, HashMap<String, Integer>> CategoryListElements){
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(dbService!=null){
+				try {
+					dbService.close();
+				} catch (IOException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/*Try to categorize all the necessary events*/
+	public void categorizing(){
+		HashMap<Long, Integer> FacebookEventId = getUncategorizedEventsIds();
+		HashMap<PlaceTag, HashMap<String, Integer>> CategoryListNumbers = getCategoryListNumbers();
+		HashMap<Long, String> onePlaceCategoryList = new HashMap<Long, String>();
+		HashMap<Integer, String> newEventDiscriminator = new HashMap<Integer, String>();
+		List<Long> nextSearchCycleEvents = new ArrayList<Long>();	// collect the not obvious events with discriminator
+		int noDiscriminator = 0;
+		int noPlaceCategory = 0;
+		for(Entry<Long, Integer>entry: FacebookEventId.entrySet()){
+			Long FacebookId = entry.getKey();
+			Integer FunspotterId = entry.getValue();
+			onePlaceCategoryList.clear();
+			String categoryName = getFacebookData(FacebookId, onePlaceCategoryList);
+			if(categoryName!=null){
+				String discriminator = easyCategorizing(categoryName);
+				if(discriminator!=null){
+					for(Entry<Long, String>entry2: onePlaceCategoryList.entrySet()){
+						HashMap<String, Integer> discriminatorNumbers = null;
+						Long oneCategoryListId = entry2.getKey();
+						String oneCategoryListName = entry2.getValue();
+						PlaceTag placeTag = new PlaceTag();
+						placeTag.id = oneCategoryListId;
+						placeTag.name = oneCategoryListName;
+						if(CategoryListNumbers.containsKey(placeTag)){
+							discriminatorNumbers = CategoryListNumbers.get(placeTag);
+							putDiscriminatorNumbersIntoHashMap(discriminatorNumbers, discriminator);
+						}else{
+							discriminatorNumbers = new HashMap<String, Integer>();
+							putDiscriminatorNumbersIntoHashMap(discriminatorNumbers, discriminator);
+						}
+						CategoryListNumbers.put(placeTag, discriminatorNumbers);
+					}
+					newEventDiscriminator.put(FunspotterId, discriminator);
+				}else{
+					noDiscriminator++;
+					nextSearchCycleEvents.add(FacebookId);
+				}
+			}else{
+				noPlaceCategory++;
+			}
+		}
+		System.out.println("Osszes event: "+FacebookEventId.size());
+		System.out.println("Bekategorizalt eventek: "+newEventDiscriminator.size());
+		System.out.println("Nem talalt discriminatort/ köveztkezõ ciklus: "+noDiscriminator);
+		System.out.println("Nem kapott vissza facebooktol place category-t: "+noPlaceCategory);
+		
+		// lehet párhuzamosítani
+		uploadEventDiscriminators(newEventDiscriminator);
+		uploadCategoryListElements(CategoryListNumbers);
+		
+		for(Entry<Long, Integer>entry: FacebookEventId.entrySet()){
+			Long FacebookId = entry.getKey();
+			Integer FunspotterId = entry.getValue();
+			if(nextSearchCycleEvents.contains(FacebookId)){
+				onePlaceCategoryList.clear();
+				String categoryName = getFacebookData(FacebookId, onePlaceCategoryList);
+				for(Entry<Long, String>entry2: onePlaceCategoryList.entrySet()){
+					Long oneCategoryListId = entry2.getKey();
+					String oneCategoryListName = entry2.getValue();
+					
+				}
+			}
+		}
+		
+		//upload events discriminator
+		//upload into new table the categoryList numbers and info
+	}
+	
+	public void valami(){
+		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
+		String MY_APP_ID = "513927361994826";
+		AccessToken accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+		FacebookClient publicOnlyFacebookClient = new DefaultFacebookClient();
+		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+		HashMap<Long, String> category_list = new HashMap<Long, String>();
+		JSONObject data = new JSONObject();
+		int egyezok = 0;
+		
+		HashMap<Long, Integer> FacebookEventId = getUncategorizedEventsIds();
+		
+		int kalapkabat = 0;
+//		for(Entry<Long, Integer>entry: FacebookEventId.entrySet()){
+//			kalapkabat++;
+//			if(kalapkabat<=200){
+//				Long FacebookId = entry.getKey();
+//				Integer EventId = entry.getValue();
+//				Event event = null;
+//				Place place = null;
+//				String category = null;
+//				JSONArray categoryList = null;
+//				JSONObject faszom = null;
+//				kalapkabat++;
+//				
+//				String EventFacebookId = FacebookId.toString();
+//				try{
+//					event = facebookClient.fetchObject(EventFacebookId, Event.class, Parameter.with("metadata", 1));
+//					System.out.println(event.getVenue().getId());
+//					try{
+//						place  = facebookClient.fetchObject(event.getVenue().getId(), Place.class, Parameter.with("metadata", 1));
+//						try{
+//							if(event.getVenue().getId().equals(138790012848413L)){
+//								System.out.println("ittvan");
+//							}
+//							System.out.println(place.getMetadata().getConnections().getTagged().toString());
+//							try {
+//								JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
+//								try{
+//									JSONArray tomb = valami.getJSONArray("data");
+//									System.out.println(tomb);
+//									JSONObject valami2 = tomb.getJSONObject(0);
+//									JSONObject valami3 = valami2.getJSONObject("to");
+//									JSONArray tomb2 = valami3.getJSONArray("data");
+//									faszom = tomb2.getJSONObject(0);
+//									category = faszom.get("category").toString();
+//									categoryList = faszom.getJSONArray("category_list");
+//									for(int i=0; i< categoryList.length(); i++){
+//										System.out.println(categoryList.getJSONObject(i).getLong("id"));
+//										System.out.println(categoryList.getJSONObject(i).get("name"));
+//										Long id = categoryList.getJSONObject(i).getLong("id");
+//										String name = categoryList.getJSONObject(i).get("name").toString();
+//										if(category_list.containsKey(id)){
+//											egyezok++;
+//										}else{
+//											category_list.put(id, name);
+//										}
+//									}
+//									System.out.println(faszom.get("category").toString());
+//								}catch(JSONException e){}
+//							} catch (IOException | JSONException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//						}catch(NullPointerException e){
+//							
+//						}
+//					}catch(FacebookException | NullPointerException e){
+//						System.out.println("nem tudta lekerni a helyet");
+//					}
+//				}catch(FacebookException e){
+//					System.out.println("nem tudta lekerni az eventet");
+//				}			
+//			}
+//		}
+		System.out.println("egyezok: "+egyezok);
+		System.out.println("összes: "+category_list.size());
+		for(Entry<Long, String>entry2: category_list.entrySet()){
+			System.out.println("Category id: "+entry2.getKey()+"   Category name: "+entry2.getValue());
+		}
+	}
+	
+	private static JSONObject readJsonFromUrl(String url) throws IOException, ParseException {
+		InputStream is = new URL(url).openStream();
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+		String jsonText = readAll(rd);
+		try {
+			JSONParser parser=new JSONParser();
+			JSONObject json = new JSONObject();
+			Object obj=parser.parse(jsonText);
+			JSONObject object=(JSONObject)obj;
+			return json;
+		}finally {
+			is.close();
+		}
+	}
+	
+	private static String readAll(Reader rd) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		int cp;
+		while ((cp = rd.read()) != -1) {
+			sb.append((char) cp);
+		}
+		return sb.toString();
+	}
+	
+}

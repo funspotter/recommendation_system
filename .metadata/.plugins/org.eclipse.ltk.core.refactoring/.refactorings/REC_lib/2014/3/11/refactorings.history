@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.incredibles.reclib.DiscriminatorCategorization.PlaceTag&apos; to &apos;FacebookPlaceTag&apos;&#x0D;&#x0A;- Original project: &apos;REC_lib&apos;&#x0D;&#x0A;- Original element: &apos;com.incredibles.reclib.DiscriminatorCategorization.PlaceTag&apos;&#x0D;&#x0A;- Renamed element: &apos;com.incredibles.reclib.DiscriminatorCategorization.FacebookPlaceTag&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;PlaceTag&apos;" flags="589826" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;com.incredibles.reclib{DiscriminatorCategorization.java[DiscriminatorCategorization[PlaceTag" matchStrategy="1" name="FacebookPlaceTag" qualified="false" references="true" similarDeclarations="false" stamp="1394553251380" textual="false" version="1.0"/>
+</session>

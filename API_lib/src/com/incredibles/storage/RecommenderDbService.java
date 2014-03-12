@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.google.gson.JsonArray;
+import com.incredibles.data.FacebookPlaceTag;
 import com.incredibles.data.Like;
 import com.incredibles.data.LogTableInfoClass;
 import com.incredibles.data.MetadataFromThirdParty;
@@ -104,11 +105,26 @@ import com.incredibles.data.Rec;
 	/**Returns events description from date. Uses converted long number for date*/
 	public HashMap<Integer,String> getEventDescriptionFromDateV2(long fromDate) throws SQLException;
 	
+	/**Update events discriminator and isOk value, handle the noinfofromfacebook case too*/
+	public void updateEventsDiscriminator(HashMap<Integer, String> categorizedEvents, List<Integer>noInfoFromFacebook);
+	
 	/**Returns all event discriminator in a hasmap*/
 	public HashMap<Integer,String> getAllEventDiscV2() throws SQLException;
 	
 	/**Return events discriminator FROM DATE in HM (eventid - discriminator)*/
 	public HashMap<Integer,String> getEventDiscriminatorFromDateV2(long fromDate) throws SQLException;
+	
+	/**Returns all event (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllEventFacebookAndFunspotterId();
+	
+	/**Returns uncategorized events (facebook and funspotter) id from facebook, based on isOk=0 value*/
+	public HashMap<Long, Integer> getNotCategorizedEventsIds();
+	
+	/**Returns checkin places name for one user. In the list one place can be not just one time*/
+	public List<String> getUserCheckin(Integer UserId);
+	
+	/**Returns legit (based on isIn) events placenames*/
+	public HashMap<Integer, List<String>> getLegitEventsPlaceName();
 	
 	/**Returns userid list, who has record in the UserDiscriminatorsRanks table*/
 	public List<Integer> whoHasDiscRankInTable();
@@ -208,4 +224,11 @@ import com.incredibles.data.Rec;
 	/**Upload facebook music like tags into IMDB table. Use MEtadatafromthirdparty class*/
 	public void uploadInfoToImdbTags(HashMap<Long, MetadataFromThirdParty> allNewLikeTagHm);
 
+	/**Update FacebookPlaceTag table, to save place categories discriminator types
+	 * and the number of categorized event based on this and other category*/
+	public void updateFacebookPlaceTagTable(HashMap<Long, FacebookPlaceTag> newTagDiscNum, HashMap<Long, FacebookPlaceTag> oldTagDiscNum);
+	
+	/**Returns all Facebook place category from this table*/
+	public HashMap<Long, FacebookPlaceTag> getFacebookPlaceTagTable();
+	
 }

@@ -40,7 +40,6 @@ import org.joda.time.DateTimeZone;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.JSONException;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -59,6 +58,7 @@ import com.incredibles.data.Show;
 import com.incredibles.data.SimpleEvent;
 import com.incredibles.data.ToJsonShow;
 import com.incredibles.data.MetadataFromThirdParty;
+import com.incredibles.data.FacebookPlaceTag;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 
@@ -3296,6 +3296,7 @@ class CloudDbManager implements RecommenderDbService {
 	
 	/*-----------------------------new db functions------------------------------*/
 	
+	
 	/**Returns true if has next line, and loadup LogLine object with data*/
 	public boolean getNextLogLineV2(LogLine line) throws SQLException {	
 		boolean ret = false;	/*default false*/
@@ -3747,6 +3748,220 @@ class CloudDbManager implements RecommenderDbService {
 			}
 		}	
 		return s;
+	}
+	
+	/**Update events discriminator and isOk value, handle the noinfofromfacebook case too*/
+	public void updateEventsDiscriminator(HashMap<Integer, String> categorizedEvents, List<Integer>noInfoFromFacebook){
+		PreparedStatement updateStatement = null;
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Timestamp ts = new Timestamp(utc);
+		String queryStrUpdate = "UPDATE Events SET isOk = ?, updatedAt = ?, discriminator = ? WHERE id = ?";
+		try {
+			updateStatement = conn.prepareStatement(queryStrUpdate);
+			for(Entry<Integer, String>entry: categorizedEvents.entrySet()){
+				Integer funspotterId = entry.getKey();
+				String discriminator  = entry.getValue();
+				updateStatement.setInt(1, 1);
+				updateStatement.setTimestamp(2, ts);
+				updateStatement.setString(3, discriminator);
+				updateStatement.setInt(4, funspotterId);
+				updateStatement.addBatch();
+			}
+			if(noInfoFromFacebook!=null){
+				for(int i=0; i<noInfoFromFacebook.size(); i++){
+					Integer funspotterId = noInfoFromFacebook.get(i);
+					updateStatement.setInt(1, 3);
+					updateStatement.setTimestamp(2, ts);
+					updateStatement.setString(3, "simple");
+					updateStatement.setInt(4, funspotterId);
+					updateStatement.addBatch();
+				}
+			}
+			int [] numUpdates1=updateStatement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (updateStatement != null) {
+				try {
+					updateStatement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/**Returns all event (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllEventFacebookAndFunspotterId(){
+		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
+		PreparedStatement statement= null;
+		ResultSet eventResults = null;
+		try {
+			String queryStr = "SELECT facebookId, EventId FROM EventFromFacebook";
+			statement = conn.prepareStatement(queryStr);
+			eventResults = statement.executeQuery();
+			while(eventResults.next()){
+				Long FacebookId = eventResults.getLong("facebookId");
+				Integer FunspotterId = eventResults.getInt("EventId");
+				if(FacebookId!=null && !FacebookId.equals(0L)){
+					if(FunspotterId!=null && !FunspotterId.equals(0)){
+						FaceAndFunspotterEventId.put(FacebookId, FunspotterId);
+					}
+				}	
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (eventResults != null)  {
+				try {
+					eventResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
+		return FaceAndFunspotterEventId;
+	}
+	
+	/**Returns uncategorized events (facebook and funspotter) id from facebook, based on isOk=0 value*/
+	public HashMap<Long, Integer> getNotCategorizedEventsIds(){
+		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
+		PreparedStatement statement= null;
+		ResultSet eventResults = null;
+		try {
+			String queryStr = "SELECT facebookId, EventId from EventFromFacebook WHERE (SELECT id FROM Events WHERE EventFromFacebook.EventId = id AND isOk = 0)";
+			statement = conn.prepareStatement(queryStr);
+			eventResults = statement.executeQuery();
+			while(eventResults.next()){
+				Long FacebookId = eventResults.getLong("facebookId");
+				Integer FunspotterId = eventResults.getInt("EventId");
+				if(FacebookId!=null && !FacebookId.equals(0L)){
+					if(FunspotterId!=null && !FunspotterId.equals(0)){
+						FaceAndFunspotterEventId.put(FacebookId, FunspotterId);
+					}
+				}	
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (eventResults != null)  {
+				try {
+					eventResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
+		return FaceAndFunspotterEventId;
+	}
+	
+	/**Returns checkin places name for one user. In the list one place can be not just one time*/
+	public List<String> getUserCheckin(Integer UserId){
+		List<String> checkinData = new ArrayList<String>();
+		PreparedStatement getCheckinStatement = null;
+		ResultSet checkinResults = null;
+		String queryStr = "SELECT id, placeName FROM FacebookCheckins WHERE (SELECT UserId FROM FacebookCheckinsUsers WHERE UserId = ? AND FacebookCheckinsUsers.FacebookCheckinId = id LIMIT 1)";
+		try {
+			getCheckinStatement = conn.prepareStatement(queryStr);
+			getCheckinStatement.setInt(1, UserId);
+			checkinResults = getCheckinStatement.executeQuery();
+			while(checkinResults.next()){
+				Integer checkinId = checkinResults.getInt("id");
+				String checkinLocationName = checkinResults.getString("placeName");
+				System.out.println(checkinId+" neve "+ checkinLocationName);
+				checkinData.add(checkinLocationName);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (checkinResults != null)  {
+				try {
+					checkinResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (getCheckinStatement != null) {
+				try {
+					getCheckinStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
+		return checkinData;
+	}
+	
+	/**Returns events placenames*/
+	public HashMap<Integer, List<String>> getLegitEventsPlaceName(){
+		HashMap<Integer, List<String>> placeNames = new HashMap<Integer, List<String>>();
+		PreparedStatement eventStatement = null;
+		ResultSet resultSet = null;
+		String eventQuery = "SELECT Shows.EventId, Locations.name FROM Shows AS Shows, Locations AS Locations WHERE Shows.LocationId = Locations.id AND (SELECT id FROM Events WHERE id = Shows.EventId AND isIn=1)";
+		try {
+			eventStatement = conn.prepareStatement(eventQuery);
+			resultSet = eventStatement.executeQuery();		
+			while (resultSet.next()) {
+				Integer EventId = resultSet.getInt("EventId");
+				String name = resultSet.getString("name");
+				if(placeNames.containsKey(EventId)){
+					List<String> places = placeNames.get(EventId);
+					places.add(name);
+					placeNames.put(EventId, places);
+				}else{
+					List<String> names = new ArrayList<String>();
+					names.add(name);
+					placeNames.put(EventId, names);
+				}
+			}		
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (resultSet != null)  {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (eventStatement != null) {
+				try {
+					eventStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return placeNames;
 	}
 	
 	/**Upload isin flag in Events table.*/
@@ -5042,6 +5257,121 @@ class CloudDbManager implements RecommenderDbService {
 				}
 			}
 		}
+	}
+	
+	/**Update FacebookPlaceTag table, to save place categories discriminator types
+	 * and the number of categorized event based on this and other category*/
+	public void updateFacebookPlaceTagTable(HashMap<Long, FacebookPlaceTag> newTagDiscNum, HashMap<Long, FacebookPlaceTag> oldTagDiscNum){
+		PreparedStatement statement = null;
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Timestamp ts = new Timestamp(utc);
+		String updateQuery = "UPDATE FacebookPlaceTag SET DiscriminatorNumber = ?, updatedAt = ? WHERE FacebookCategoryId = ?";
+		String insertQuery = "INSERT INTO FacebookPlaceTag (FacebookCategoryId, FacebookCategoryName, DiscriminatorNumber, createdAt, updatedAt) VALUES (?,?,?,?,?)";
+		/*UPDATE*/
+		try {
+			statement = conn.prepareStatement(updateQuery);
+			for(Entry<Long, FacebookPlaceTag>entry: newTagDiscNum.entrySet()){
+				Long categoryId = entry.getKey();
+				FacebookPlaceTag categoryInfo = entry.getValue();
+				if(oldTagDiscNum.containsKey(oldTagDiscNum)){	// update part
+					statement.setString(1, categoryInfo.getDiscriminatorNumberJson().toString());
+					statement.setTimestamp(2, ts);
+					statement.setLong(3, categoryInfo.getId());
+					statement.addBatch();
+				}
+			}
+			int[] num = statement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		/*INSERT*/
+		try {
+			statement = conn.prepareStatement(insertQuery);
+			for(Entry<Long, FacebookPlaceTag>entry: newTagDiscNum.entrySet()){
+				Long categoryId = entry.getKey();
+				FacebookPlaceTag categoryInfo = entry.getValue();
+				if(!oldTagDiscNum.containsKey(oldTagDiscNum)){	// insert part
+					statement.setLong(1, categoryInfo.getId());
+					statement.setString(2, categoryInfo.getName());
+					statement.setString(3, categoryInfo.getDiscriminatorNumberJson().toString());
+					statement.setTimestamp(4, ts);
+					statement.setTimestamp(5, ts);
+					statement.addBatch();
+				}
+			}
+			int[] num = statement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/**Returns all Facebook place category from this table*/
+	public HashMap<Long, FacebookPlaceTag> getFacebookPlaceTagTable(){
+		HashMap<Long, FacebookPlaceTag> tagDiscriminatorNumber = new HashMap<Long, FacebookPlaceTag>();
+		PreparedStatement selectStatement = null;
+		ResultSet resultSet = null;
+		String queryStr = null;
+		try {
+			queryStr = "SELECT FacebookCategoryId, FacebookCategoryName, DiscriminatorNumber FROM FacebookPlaceTag WHERE 1";
+			selectStatement = conn.prepareStatement(queryStr);
+			resultSet = selectStatement.executeQuery();
+			while(resultSet.next()){
+				Long categoryId = resultSet.getLong("FacebookCategoryId");
+				String categoryName = resultSet.getString("FacebookCategoryName");
+				String discriminatorNumberJson = resultSet.getString("DiscriminatorNumber");
+				FacebookPlaceTag oneCategory = new FacebookPlaceTag();
+				oneCategory.setId(categoryId);
+				oneCategory.setName(categoryName);
+				try {
+					oneCategory.setDiscriminatorNumberJson(discriminatorNumberJson);
+				} catch (org.json.simple.parser.ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				tagDiscriminatorNumber.put(categoryId, oneCategory);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (selectStatement != null) {
+				try {
+					selectStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}	
+		}
+		return tagDiscriminatorNumber;
 	}
 	
 	/**Return timestamp date in integer*/

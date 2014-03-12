@@ -1,0 +1,35 @@
+package com.incredibles.reclib;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
+
+public class CheckinFilter {
+
+	/*Return users checkin place name*/
+	public List<String> getCheckins(int UserId){
+		List<String> checkins = null;
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			checkins = dbService.getUserCheckin(UserId);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return checkins;
+	}
+
+	
+}

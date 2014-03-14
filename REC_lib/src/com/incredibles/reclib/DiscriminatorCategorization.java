@@ -31,6 +31,7 @@ import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.FacebookClient.AccessToken;
 import com.restfb.exception.FacebookException;
+import com.restfb.exception.FacebookOAuthException;
 import com.restfb.json.JsonException;
 import com.restfb.types.Event;
 import com.restfb.types.Place;
@@ -39,7 +40,7 @@ public class DiscriminatorCategorization {
 	
 	String cinemaList = "Cinema";
 	String exhibitionList = "Museum/Art Gallery";
-	String gastroList = "Food/Grocery, Restaurant/Café";
+	String gastroList = "Food/Grocery, Restaurant/Café, Restaurant/Cafe";
 	String musicList = "Concert Venue";
 	String sportList = "Attractions/Things to Do, Outdoor Gear/Sporting Goods, Sports Venue, Sports/Recreation/Activities";
 	String travelList = "Transport, Tours/Sightseeing, Spas/Beauty/Personal Care, Airport, Hotel, Landmark";
@@ -51,7 +52,7 @@ public class DiscriminatorCategorization {
 		RecommenderDbService dbService = null;
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
-			FacebookEventId = dbService.getAllEventFacebookAndFunspotterId();
+			FacebookEventId = dbService.getAllUncategorizedFacebookEvents();
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -71,17 +72,17 @@ public class DiscriminatorCategorization {
 	public String easyCategorizing(String FacebookCategory){
 		if(cinemaList.contains(FacebookCategory)){
 			return "Cinema";
-		}else if(exhibitionList.contains(FacebookCategory)){
+		}else if(exhibitionList.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Exhibition";
-		}else if(gastroList.contains(FacebookCategory)){
+		}else if(gastroList.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Gastro";
-		}else if(musicList.contains(FacebookCategory)){
+		}else if(musicList.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Music";
-		}else if(sportList.contains(FacebookCategory)){
+		}else if(sportList.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Sport";
-		}else if(travelList.contains(FacebookCategory)){
+		}else if(travelList.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Travel";
-		}else if(partyList.contains(FacebookCategory)){
+		}else if(partyList.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Party";
 		}else{
 			return null;
@@ -133,7 +134,8 @@ public class DiscriminatorCategorization {
 		}else{
 			if(discriminatorNumbers.containsKey(Discriminator)){
 				Integer number = discriminatorNumbers.get(Discriminator);
-				discriminatorNumbers.put(Discriminator, number++);
+				Integer newNum = number+1;
+				discriminatorNumbers.put(Discriminator, newNum);
 			}else{
 				System.out.println("ProblemInDiscNumberUpdate");
 			}
@@ -171,45 +173,51 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**Returns one place category, and fill the onePlaceCategory hashmap with categoryList elements*/
-	public String getFacebookData(Long FacebookId, HashMap<Long, String> onePlaceCategoryList){
+	public String getFacebookData(Long FacebookId, HashMap<Long, String> onePlaceCategoryList, AccessToken accessToken){
 		Event event = null;
 		Place place = null;
 		String categoryString = null;
 		JSONArray categoryList = null;
-		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
-		String MY_APP_ID = "513927361994826";
-		AccessToken accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
-		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
-		String EventFacebookId = FacebookId.toString();
 		try{
-			event = facebookClient.fetchObject(EventFacebookId, Event.class, Parameter.with("metadata", 1));
+			FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+			String EventFacebookId = FacebookId.toString();
 			try{
-				place  = facebookClient.fetchObject(event.getVenue().getId(), Place.class, Parameter.with("metadata", 1));
+				event = facebookClient.fetchObject(EventFacebookId, Event.class, Parameter.with("metadata", 1));
 				try{
-					JSONObject category = null;
-					JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
-					JSONArray tomb = (JSONArray) valami.get("data");
-					System.out.println(tomb);
-					JSONObject valami2 = (JSONObject) tomb.get(0);
-					JSONObject valami3 = (JSONObject) valami2.get("to");
-					JSONArray tomb2 = (JSONArray) valami3.get("data");
-					category = (JSONObject) tomb2.get(0);
-					categoryString = category.get("category").toString();
-					categoryList = (JSONArray) category.get("category_list");
-					for(int i=0; i< categoryList.size(); i++){
-						JsonObject oneCategoryList = (JsonObject) categoryList.get(i);
-						Long id = oneCategoryList.get("id").getAsLong();
-						String oneCategoryListName= oneCategoryList.get("name").getAsString();
-						onePlaceCategoryList.put(id, oneCategoryListName);
+					place  = facebookClient.fetchObject(event.getVenue().getId(), Place.class, Parameter.with("metadata", 1));
+					try{
+						JSONObject category = null;
+						JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
+						JSONArray tomb = (JSONArray) valami.get("data");
+						System.out.println(tomb);
+						try{
+							JSONObject valami2 = (JSONObject) tomb.get(0);
+							JSONObject valami3 = (JSONObject) valami2.get("to");
+							JSONArray tomb2 = (JSONArray) valami3.get("data");
+							category = (JSONObject) tomb2.get(0);
+							categoryString = category.get("category").toString();
+							categoryList = (JSONArray) category.get("category_list");
+							for(int i=0; i< categoryList.size(); i++){
+								JSONObject oneCategoryList = (JSONObject) categoryList.get(i);
+								Long id = Long.parseLong((String) oneCategoryList.get("id"));
+								String oneCategoryListName= (String) oneCategoryList.get("name");
+								onePlaceCategoryList.put(id, oneCategoryListName);
+							}
+						}catch(IndexOutOfBoundsException e){
+							System.out.println("dontHaveZeroArray");
+						}
+					}catch(NullPointerException | IOException | ParseException e){
+						System.out.println("problemWithJson");
 					}
-				}catch(NullPointerException | IOException | ParseException e){
-					System.out.println("problemWithJson");
+				}catch(FacebookException | NullPointerException e){
+					System.out.println("NoPlaceInfo");
 				}
 			}catch(FacebookException e){
-				System.out.println("NoPlaceInfo");
+				System.out.println("NoEventInfo");
 			}
-		}catch(FacebookException e){
-			System.out.println("NoEventInfo");
+		}catch(FacebookOAuthException e){
+			System.out.println("ShouldGetNewToken");
+			categoryString = "ShouldGetNewToken";			
 		}
 		return categoryString;
 	}
@@ -281,7 +289,7 @@ public class DiscriminatorCategorization {
 		insertLogInformation("EventCategorizeStart");
 		HashMap<Long, Integer> FacebookEventId = getUncategorizedEventsIds();
 		HashMap<Long, FacebookPlaceTag> CategoryListNumbers = getCategoryListNumbers();
-		HashMap<Long, FacebookPlaceTag> oldCategoryListNumbers = CategoryListNumbers;
+		HashMap<Long, FacebookPlaceTag> oldCategoryListNumbers = new HashMap<Long, FacebookPlaceTag>(CategoryListNumbers);
 		HashMap<Long, String> onePlaceCategoryList = new HashMap<Long, String>();
 		HashMap<Integer, String> newEventDiscriminator = new HashMap<Integer, String>();
 		List<Long> nextSearchCycleEvents = new ArrayList<Long>();	// collect the not obvious events with discriminator
@@ -290,11 +298,24 @@ public class DiscriminatorCategorization {
 		int noPlaceCategory = 0;
 		int notCategorizedEvents = 0;
 		int sumUncatEventNum = FacebookEventId.size();
+		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
+		String MY_APP_ID = "513927361994826";
+		AccessToken accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
 		for(Entry<Long, Integer>entry: FacebookEventId.entrySet()){
 			Long FacebookId = entry.getKey();
 			Integer FunspotterId = entry.getValue();
 			onePlaceCategoryList.clear();
-			String categoryName = getFacebookData(FacebookId, onePlaceCategoryList);
+			String categoryName = getFacebookData(FacebookId, onePlaceCategoryList, accessToken);
+			try{
+				if(categoryName.equals("ShouldGetNewToken")){
+					accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+					facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+					categoryName = getFacebookData(FacebookId, onePlaceCategoryList, accessToken);
+				}
+			}catch(NullPointerException e){
+				System.out.println("categoryNameWasNull");
+			}
 			if(categoryName!=null){	// got info from facebook
 				String discriminator = easyCategorizing(categoryName);
 				if(discriminator!=null){	// no json problem
@@ -302,19 +323,23 @@ public class DiscriminatorCategorization {
 						FacebookPlaceTag discriminatorNumbers = null;
 						Long oneCategoryListId = entry2.getKey();
 						String oneCategoryListName = entry2.getValue();
-						FacebookPlaceTag placeTag = new FacebookPlaceTag();
-						placeTag.setId(oneCategoryListId);
-						placeTag.setName(oneCategoryListName);
-						if(CategoryListNumbers.containsKey(oneCategoryListId)){
+						if(CategoryListNumbers.containsKey(oneCategoryListId)){ // new category is in the database
 							discriminatorNumbers = CategoryListNumbers.get(oneCategoryListId);
-							putDiscriminatorNumbersIntoHashMap(discriminatorNumbers.getDiscriminatorNumber(), discriminator);
-						}else{
+							HashMap<String, Integer> dbDiscNum = discriminatorNumbers.getDiscriminatorNumber();
+							putDiscriminatorNumbersIntoHashMap(dbDiscNum, discriminator);
+							discriminatorNumbers.setDiscriminatorNumber(dbDiscNum);
+							CategoryListNumbers.put(oneCategoryListId, discriminatorNumbers);
+						}else{		//new category isnt in the database
 							HashMap<String, Integer> discNumtoFacePlaceTag = new HashMap<String, Integer>();
 							putDiscriminatorNumbersIntoHashMap(discNumtoFacePlaceTag, discriminator);
+							discriminatorNumbers = new FacebookPlaceTag();
+							discriminatorNumbers.setId(oneCategoryListId);
+							discriminatorNumbers.setName(oneCategoryListName);
 							discriminatorNumbers.setDiscriminatorNumber(discNumtoFacePlaceTag);
+							CategoryListNumbers.put(oneCategoryListId, discriminatorNumbers);
 						}
-						CategoryListNumbers.put(oneCategoryListId, discriminatorNumbers);
 					}
+					insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+discriminator);
 					newEventDiscriminator.put(FunspotterId, discriminator);
 				}else{
 					noDiscriminator++;
@@ -332,8 +357,10 @@ public class DiscriminatorCategorization {
 		System.out.println("Nem kapott vissza facebooktol place category-t: "+noPlaceCategory);
 		
 		// lehet párhuzamosítani
+		insertLogInformation("EventCategorizationUploadDataStart");
 		uploadEventDiscriminators(newEventDiscriminator,null);
 		uploadCategoryListElements(CategoryListNumbers,oldCategoryListNumbers);
+		insertLogInformation("EventCategorizationUploadDataEnd");
 		newEventDiscriminator.clear();
 		
 		HashMap<String, Integer> eventDiscriminatorNumber = new HashMap<String, Integer>();
@@ -342,7 +369,12 @@ public class DiscriminatorCategorization {
 			Integer FunspotterId = entry.getValue();
 			if(nextSearchCycleEvents.contains(FacebookId)){
 				eventDiscriminatorNumber.clear();
-				String categoryName = getFacebookData(FacebookId, onePlaceCategoryList);
+				String categoryName = getFacebookData(FacebookId, onePlaceCategoryList, accessToken);
+				if(categoryName.equals("ShouldGetNewToken")){
+					accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+					facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+					categoryName = getFacebookData(FacebookId, onePlaceCategoryList, accessToken);
+				}
 				for(Entry<Long, String>entry2: onePlaceCategoryList.entrySet()){
 					Long oneCategoryListId = entry2.getKey();
 					String oneCategoryListName = entry2.getValue();
@@ -363,6 +395,7 @@ public class DiscriminatorCategorization {
 				}
 				if(max != 0 && maxDisc!=null){
 					newEventDiscriminator.put(FunspotterId, maxDisc);
+					insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+maxDisc);
 				}else{
 					notCategorizedEvents++;
 				}
@@ -379,15 +412,16 @@ public class DiscriminatorCategorization {
 		InputStream is = new URL(url).openStream();
 		BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
 		String jsonText = readAll(rd);
+		JSONObject json = null;
 		try {
 			JSONParser parser=new JSONParser();
-			JSONObject json = new JSONObject();
+			json = new JSONObject();
 			Object obj=parser.parse(jsonText);
-			JSONObject object=(JSONObject)obj;
-			return json;
+			json=(JSONObject)obj;
 		}finally {
 			is.close();
 		}
+		return json;
 	}
 	
 	private static String readAll(Reader rd) throws IOException {

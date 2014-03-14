@@ -74,7 +74,8 @@ public class FacebookPlaceTag {
 		for(int i=0; i<discNumArray.size(); i++){
 			JSONObject oneDiscNum = (JSONObject) discNumArray.get(i);
 			String discriminator = (String) oneDiscNum.get("discriminator");
-			Integer number = (Integer) oneDiscNum.get("number");
+			long integernum = (Long) oneDiscNum.get("number");
+			int number = (int) integernum;
 			discriminatorNumber.put(discriminator, number);
 		}
 		this.discriminatorNumber = discriminatorNumber;

@@ -36,8 +36,10 @@ import com.incredibles.data.Show;
 import com.incredibles.data.SimpleEvent;
 import com.incredibles.reclib.DavidCos;
 import com.incredibles.reclib.DiscriminatorAndLikeV2;
+import com.incredibles.reclib.DiscriminatorCategorization;
 import com.incredibles.reclib.FirstStep;
 import com.incredibles.reclib.LikeWeighting;
+import com.incredibles.reclib.RecMaintenance;
 import com.incredibles.reclib.RecommendationAccuracy;
 import com.incredibles.reclib.SecondStep;
 import com.incredibles.reclib.TagMaker;
@@ -193,11 +195,51 @@ public class API extends HttpServlet {
 				};
 				Thread t = new Thread(r);
 				t.start();
+			}else if(request.getParameter("cmd").equals("maintainRecTableOnce")){
+				Runnable r = new Runnable(){
+					@Override
+					public void run() {			
+						RecommenderDbService dbService2=null;
+						try {
+							dbService2 = RecommenderDbServiceCreator.createCloud();
+							dbService2.insertRecommendationLog("RecMaintainStart", 0);
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}finally {
+							if (dbService2 != null) {
+								try {
+									dbService2.close();
+								} catch (SQLException | IOException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+						RecMaintenance maintain = new RecMaintenance();
+						maintain.maintainRecTable();
+						try {
+							dbService2 = RecommenderDbServiceCreator.createCloud();
+							dbService2.insertRecommendationLog("RecMaintainDone", 0);
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}finally {
+							if (dbService2 != null) {
+								try {
+									dbService2.close();
+								} catch (SQLException | IOException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				};
+				Thread t = new Thread(r);
+				t.start();
 			}else if(request.getParameter("cmd").equals("startGravity")){
 				Runnable r = new Runnable(){
 					@Override
 					public void run() {
-						
 						CalculateGravity gravity = new CalculateGravity();
 						gravity.startAutomaticGravity();
 					}
@@ -262,6 +304,27 @@ public class API extends HttpServlet {
 				};
 				Thread t = new Thread(r);
 				t.start();				
+			}else if(request.getParameter("cmd").equals("categorizeFacebookEvents")){
+				Runnable r = new Runnable(){
+					@Override
+					public void run() {			
+						RunFacebookEventCategorization categorization = new RunFacebookEventCategorization();
+						categorization.startAutomaticCategorization();
+					}
+				};
+				Thread t = new Thread(r);
+				t.start();
+			}else if(request.getParameter("cmd").equals("categorizeFacebookEventsOnce")){
+				ret = "lefutott";
+				Runnable r = new Runnable(){
+					@Override
+					public void run() {	
+						DiscriminatorCategorization categorize = new DiscriminatorCategorization();
+						categorize.categorizing();
+					}
+				};
+				Thread t = new Thread(r);
+				t.start();
 			}else if (request.getParameter("cmd").equals("recaccuracy")){
 				
 			//	HashMap<Integer,Double> modeOne = new HashMap<Integer,Double>();

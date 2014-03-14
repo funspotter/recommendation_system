@@ -109,8 +109,8 @@ public class Main {
 	
 		
 		
-		DiscriminatorCategorization valami = new DiscriminatorCategorization();
-		valami.valami();
+		DiscriminatorCategorization categor = new DiscriminatorCategorization();
+		categor.categorizing();
 		
 		
 		

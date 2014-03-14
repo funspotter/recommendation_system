@@ -1,0 +1,84 @@
+package com.incredibles.data;
+
+import java.util.HashMap;
+import java.util.Map.Entry;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+/**This class used to get Facebook place tags with facebook place tag id,
+ * name, and our discriminators with numbers to help categorize events, witch
+ * defines how much event was categorized based on this tag into which discriminator*/
+public class FacebookPlaceTag {	
+	
+	/**Facebook Place tag Id*/
+	protected Long Id;
+	
+	/**Tag name*/
+	protected String name;
+	
+	/**Defines how much event was categorized based on this tag, and what discriminator*/
+	protected HashMap<String, Integer> discriminatorNumber;
+	
+	
+	public Long getId() {
+		return Id;
+	}
+
+	public void setId(Long id) {
+		Id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public HashMap<String, Integer> getDiscriminatorNumber() {
+		return discriminatorNumber;
+	}
+
+	public void setDiscriminatorNumber(HashMap<String, Integer> discriminatorNumber) {
+		this.discriminatorNumber = discriminatorNumber;
+	}
+	
+	/**Return discriminator numbers in json*/
+	public JSONObject getDiscriminatorNumberJson(){
+		JSONArray discNumArray = new JSONArray();
+		for(Entry<String, Integer> entry: this.discriminatorNumber.entrySet()){
+			JSONObject one = new JSONObject();
+			String discriminator = entry.getKey();
+			Integer number = entry.getValue();
+			one.put("discriminator", discriminator);
+			one.put("number", number);	
+			discNumArray.add(one);
+		}
+		JSONObject discriminatorJson = new JSONObject();
+		discriminatorJson.put("data", discNumArray);
+		return discriminatorJson;
+	}
+	
+	/**Sets discriminatorNumber from json string
+	 * @throws ParseException */
+	public void setDiscriminatorNumberJson(String json) throws ParseException{
+		HashMap<String, Integer> discriminatorNumber = new HashMap<String, Integer>();
+		JSONParser parser=new JSONParser();
+		Object obj=parser.parse(json);
+		JSONObject discriminatorJson=(JSONObject)obj;
+		JSONArray discNumArray = (JSONArray) discriminatorJson.get("data");
+		for(int i=0; i<discNumArray.size(); i++){
+			JSONObject oneDiscNum = (JSONObject) discNumArray.get(i);
+			String discriminator = (String) oneDiscNum.get("discriminator");
+			int integernum = (int) (Long) oneDiscNum.get("number");
+			Integer number = Integer.parseInt((String) oneDiscNum.get("number"));
+			discriminatorNumber.put(discriminator, number);
+		}
+		this.discriminatorNumber = discriminatorNumber;
+	}
+	
+}

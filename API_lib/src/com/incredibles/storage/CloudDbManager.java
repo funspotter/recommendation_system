@@ -3794,56 +3794,15 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Returns all event (facebook and funspotter) id from facebook*/
-	public HashMap<Long, Integer> getAllEventFacebookAndFunspotterId(){
-		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
-		PreparedStatement statement= null;
-		ResultSet eventResults = null;
-		try {
-			String queryStr = "SELECT facebookId, EventId FROM EventFromFacebook";
-			statement = conn.prepareStatement(queryStr);
-			eventResults = statement.executeQuery();
-			while(eventResults.next()){
-				Long FacebookId = eventResults.getLong("facebookId");
-				Integer FunspotterId = eventResults.getInt("EventId");
-				if(FacebookId!=null && !FacebookId.equals(0L)){
-					if(FunspotterId!=null && !FunspotterId.equals(0)){
-						FaceAndFunspotterEventId.put(FacebookId, FunspotterId);
-					}
-				}	
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			if (eventResults != null)  {
-				try {
-					eventResults.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			if (statement != null) {
-				try {
-					statement.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}	
-		return FaceAndFunspotterEventId;
-	}
-	
-	/**Returns uncategorized events (facebook and funspotter) id from facebook, based on isOk=0 value*/
-	public HashMap<Long, Integer> getNotCategorizedEventsIds(){
+	/**Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllUncategorizedFacebookEvents(){
 		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
 		PreparedStatement statement= null;
 		ResultSet eventResults = null;
 		try {
 			String queryStr = "SELECT facebookId, EventId from EventFromFacebook WHERE (SELECT id FROM Events WHERE EventFromFacebook.EventId = id AND isOk = 0)";
-			statement = conn.prepareStatement(queryStr);
+			String queryStr2 = "SELECT facebookId, EventId from EventFromFacebook WHERE 1";
+			statement = conn.prepareStatement(queryStr2);
 			eventResults = statement.executeQuery();
 			while(eventResults.next()){
 				Long FacebookId = eventResults.getLong("facebookId");
@@ -5259,7 +5218,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Update FacebookPlaceTag table, to save place categories discriminator types
+	/**Update FacebookPlaceTags table, to save place categories discriminator types
 	 * and the number of categorized event based on this and other category*/
 	public void updateFacebookPlaceTagTable(HashMap<Long, FacebookPlaceTag> newTagDiscNum, HashMap<Long, FacebookPlaceTag> oldTagDiscNum){
 		PreparedStatement statement = null;
@@ -5267,15 +5226,15 @@ class CloudDbManager implements RecommenderDbService {
 		DateTimeZone zone = DateTimeZone.getDefault();
 		long utc = zone.convertLocalToUTC(local.getTime(), false);
 		Timestamp ts = new Timestamp(utc);
-		String updateQuery = "UPDATE FacebookPlaceTag SET DiscriminatorNumber = ?, updatedAt = ? WHERE FacebookCategoryId = ?";
-		String insertQuery = "INSERT INTO FacebookPlaceTag (FacebookCategoryId, FacebookCategoryName, DiscriminatorNumber, createdAt, updatedAt) VALUES (?,?,?,?,?)";
+		String updateQuery = "UPDATE FacebookPlaceTags SET discriminatorNumber = ?, updatedAt = ? WHERE facebookCategoryId = ?";
+		String insertQuery = "INSERT INTO FacebookPlaceTags (facebookCategoryId, facebookCategoryName, discriminatorNumber, createdAt, updatedAt) VALUES (?,?,?,?,?)";
 		/*UPDATE*/
 		try {
 			statement = conn.prepareStatement(updateQuery);
 			for(Entry<Long, FacebookPlaceTag>entry: newTagDiscNum.entrySet()){
 				Long categoryId = entry.getKey();
 				FacebookPlaceTag categoryInfo = entry.getValue();
-				if(oldTagDiscNum.containsKey(oldTagDiscNum)){	// update part
+				if(oldTagDiscNum.containsKey(categoryId)){	// update part
 					statement.setString(1, categoryInfo.getDiscriminatorNumberJson().toString());
 					statement.setTimestamp(2, ts);
 					statement.setLong(3, categoryInfo.getId());
@@ -5301,7 +5260,7 @@ class CloudDbManager implements RecommenderDbService {
 			for(Entry<Long, FacebookPlaceTag>entry: newTagDiscNum.entrySet()){
 				Long categoryId = entry.getKey();
 				FacebookPlaceTag categoryInfo = entry.getValue();
-				if(!oldTagDiscNum.containsKey(oldTagDiscNum)){	// insert part
+				if(!oldTagDiscNum.containsKey(categoryId)){	// insert part
 					statement.setLong(1, categoryInfo.getId());
 					statement.setString(2, categoryInfo.getName());
 					statement.setString(3, categoryInfo.getDiscriminatorNumberJson().toString());
@@ -5332,7 +5291,7 @@ class CloudDbManager implements RecommenderDbService {
 		ResultSet resultSet = null;
 		String queryStr = null;
 		try {
-			queryStr = "SELECT FacebookCategoryId, FacebookCategoryName, DiscriminatorNumber FROM FacebookPlaceTag WHERE 1";
+			queryStr = "SELECT facebookCategoryId, facebookCategoryName, discriminatorNumber FROM FacebookPlaceTags WHERE 1";
 			selectStatement = conn.prepareStatement(queryStr);
 			resultSet = selectStatement.executeQuery();
 			while(resultSet.next()){

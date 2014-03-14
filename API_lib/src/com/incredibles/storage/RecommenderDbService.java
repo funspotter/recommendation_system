@@ -114,12 +114,9 @@ import com.incredibles.data.Rec;
 	/**Return events discriminator FROM DATE in HM (eventid - discriminator)*/
 	public HashMap<Integer,String> getEventDiscriminatorFromDateV2(long fromDate) throws SQLException;
 	
-	/**Returns all event (facebook and funspotter) id from facebook*/
-	public HashMap<Long, Integer> getAllEventFacebookAndFunspotterId();
-	
-	/**Returns uncategorized events (facebook and funspotter) id from facebook, based on isOk=0 value*/
-	public HashMap<Long, Integer> getNotCategorizedEventsIds();
-	
+	/**Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllUncategorizedFacebookEvents();
+		
 	/**Returns checkin places name for one user. In the list one place can be not just one time*/
 	public List<String> getUserCheckin(Integer UserId);
 	

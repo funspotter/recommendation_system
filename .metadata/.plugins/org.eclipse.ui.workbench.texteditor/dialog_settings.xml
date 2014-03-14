@@ -13,16 +13,16 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="Upload" key="selection"/>
+		<item value="insertRecommendationLog" key="selection"/>
 		<list key="findhistory">
+			<item value="insertRecommendationLog"/>
+			<item value="getAllUn"/>
+			<item value="updateFacebookPlaceTagTable"/>
+			<item value="getFacebookPlaceTagTable"/>
+			<item value="getAllEventFacebookAndFunspotterId"/>
+			<item value="updateEventsDiscriminator"/>
 			<item value="upload"/>
 			<item value="discriminator"/>
-			<item value="getRecPUser"/>
-			<item value="batch"/>
-			<item value="insertRecPV4"/>
-			<item value="updateIsinFlagForEvents"/>
-			<item value="getLegitNotinEventsIdFromDate"/>
-			<item value="uploadUserDiscriminatorRank"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>

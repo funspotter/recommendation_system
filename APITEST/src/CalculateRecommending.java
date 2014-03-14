@@ -9,10 +9,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.incredibles.data.LogTableTypes;
-import com.incredibles.reclib.EventReplacerV1;
-import com.incredibles.reclib.UploadFiltersResult;
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
+
+import com.incredibles.reclib.UploadFiltersResultV2;
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
 
 
 public class CalculateRecommending {
@@ -21,19 +21,17 @@ public class CalculateRecommending {
 
 	public void startAutomaticRecommending() {
 		final Runnable beeper = new Runnable() {
-			public void run() {				
-							
-				ClientDbService dbService = null;
+			public void run() {							
+				RecommenderDbService dbService = null;
 				try {
-					dbService = ClientDbServiceCreator.createCloud();
-					HashMap<Integer, Long> hm = dbService.getAllFaceAndUserId();
+					dbService = RecommenderDbServiceCreator.createCloud();
+					HashMap<Integer, Long> hm = dbService.getAllFaceAndUserIdV2();
 					String info = "SecondStepDone";
 					for(Entry<Integer, Long> entry: hm.entrySet()){
 						Integer userID = entry.getKey();
 						Long fbID = entry.getValue();
-						UploadFiltersResult.filterExecute(userID);
-					//	dbService.uploadLog(fbID, 0, Calendar.getInstance().getTimeInMillis(), LogTableTypes.calcRec);
-						dbService.insertRECLog(info, userID);
+						UploadFiltersResultV2.filterExecute(userID);
+						dbService.insertRecommendationLog(info, userID);
 					}
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
@@ -47,9 +45,6 @@ public class CalculateRecommending {
 						}
 					}
 				}
-				
-				
-				
 			}
 		};
 		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 168, TimeUnit.HOURS);

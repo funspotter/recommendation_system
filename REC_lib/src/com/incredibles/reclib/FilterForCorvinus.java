@@ -17,8 +17,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.incredibles.data.Like;
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
 
@@ -36,11 +34,11 @@ public class FilterForCorvinus implements FiltersForRec{
 
 	@Override
 	public Integer getUserIdFromFbId(long fbId) {
-		ClientDbService dbService = null;
+		RecommenderDbService dbService = null;
 		Integer userId = null;
 		try {
-			dbService = ClientDbServiceCreator.createCloud();
-			userId = dbService.getUserIDforFbUserID(fbId);
+			dbService = RecommenderDbServiceCreator.createCloud();
+			userId = dbService.getUserIdforFacebookUserId(fbId);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -59,11 +57,11 @@ public class FilterForCorvinus implements FiltersForRec{
 	
 	@Override
 	public List<Like> getAllLikeForUser(long fbId) {
-		ClientDbService dbService = null;
+		RecommenderDbService dbService = null;
 		List<Like> likes = null;
 		try {
-			dbService = ClientDbServiceCreator.createCloud();
-			likes = dbService.getAllLikeForFbUserId(fbId);
+			dbService = RecommenderDbServiceCreator.createCloud();
+			likes = dbService.getAllLikeForFbUserIdV2(fbId);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -85,7 +83,7 @@ public class FilterForCorvinus implements FiltersForRec{
 		List<Integer> events = new ArrayList<Integer>();
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
-			events = dbService.eventsInShowList(1);
+			events = dbService.getLegitEventsIdFromDate(date);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -108,7 +106,7 @@ public class FilterForCorvinus implements FiltersForRec{
 		try {
 			eventDescName = new ArrayList <HashMap<Integer,String>>();
 			dbService = RecommenderDbServiceCreator.createCloud();
-			eventDescName = dbService.getExistEventDescAndName(from);
+			eventDescName = dbService.getLegitEventDescAndNameFromDate(from);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -199,7 +197,7 @@ public class FilterForCorvinus implements FiltersForRec{
 		}
 		if(!corvinusEvents.isEmpty()){
 			discriminatorRank = convertLiketoNumber(likes);
-			Double rankMax = DiscriminatorAndLike.maximumValueInHashmap(discriminatorRank);
+			Double rankMax = DiscriminatorAndLikeV2.maximumValueInHashmap(discriminatorRank);
 			for(int i = 0; i < corvinusEvents.size(); i++){
 				double newRank = rankMax+Math.random()/100;
 				if(newRank >= 0 && newRank < 1.0){
@@ -220,7 +218,7 @@ public class FilterForCorvinus implements FiltersForRec{
 		HashMap<String, Integer> discNumber = new HashMap<String, Integer>();
 		HashMap<String, Double> discRank = new HashMap<String, Double>();
 			
-		DiscriminatorAndLike startObject = new DiscriminatorAndLike();
+		DiscriminatorAndLikeV2 startObject = new DiscriminatorAndLikeV2();
 			
 		/* Update default values in HashMap */
 		discNumber.put("cinema", 0);
@@ -240,31 +238,31 @@ public class FilterForCorvinus implements FiltersForRec{
 			Like oneLike = fbLikes.get(i);
 			String fbCategory = oneLike.getCategory().toLowerCase();
 			if(startObject.cinema.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"cinema");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"cinema");
 			}if(startObject.exhibition.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"exhibition");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"exhibition");
 			}if(startObject.festival.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"festival");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"festival");
 			}if(startObject.gastro.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"gastro");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"gastro");
 			}if(startObject.kid.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"kid");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"kid");
 			}if(startObject.music.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"music");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"music");
 			}else if(startObject.sport.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"sport");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"sport");
 			}if(startObject.theater.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"theater");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"theater");
 			}if(startObject.travel.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"travel");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"travel");
 			}if(startObject.other.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"other");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"other");
 			}if(startObject.party.contains(fbCategory)){
-				DiscriminatorAndLike.likeCountPlusPlus(discNumber,"party");
+				DiscriminatorAndLikeV2.likeCountPlusPlus(discNumber,"party");
 			}
 		}			
 			/* Discriminator number to discriminator ranks */
-			discRank = DiscriminatorAndLike.convertDiscNumbToDiscRank(discNumber);
+			discRank = DiscriminatorAndLikeV2.convertDiscNumbToDiscRank(discNumber);
 			return discRank;
 		}
 	

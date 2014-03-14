@@ -6,8 +6,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.incredibles.reclib.Recommender;
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
 
 
 
@@ -19,13 +19,13 @@ public class CalculateIALSprobe {
 	public void startAutomaticRecommending() {
 		final Runnable beeper = new Runnable() {
 			public void run() {
-				ClientDbService dbService = null;
+				RecommenderDbService dbService = null;
 				String info = "ialsforus";
 				try {
-					dbService = ClientDbServiceCreator.createCloud();
+					dbService = RecommenderDbServiceCreator.createCloud();
 					Recommender valami = new Recommender();
 					valami.newRecFunction();
-					dbService.insertRECLog(info, 0);
+					dbService.insertRecommendationLog(info, 0);
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

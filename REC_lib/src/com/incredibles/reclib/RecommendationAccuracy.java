@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
 
 public class RecommendationAccuracy {
 	
@@ -22,9 +22,9 @@ public class RecommendationAccuracy {
 	public static HashMap<Integer,Double> accuracyModOne() throws SQLException{
 		
 		HashMap<Integer,Double> UserRmsHm = new HashMap<Integer,Double>();
-		ClientDbService dbService = ClientDbServiceCreator.createCloud();
+		RecommenderDbService dbService = RecommenderDbServiceCreator.createCloud();
 		List<Integer> UserArray = new ArrayList<Integer>();
-		UserArray = dbService.getUserIdArrayFromTestUser();
+		UserArray = dbService.getUserIdArray();
 		HashMap<Integer,Double> EventRankhm = new HashMap<Integer,Double>();
 		HashMap<Integer,Integer> eventNumberInLogtoUser = new HashMap<Integer,Integer>();
 		
@@ -33,8 +33,8 @@ public class RecommendationAccuracy {
 		
 		for(int i=0; i<UserArray.size(); i++){	// usereken megy vegig
 			int UserId = UserArray.get(i);
-			EventRankhm = dbService.getEventIdArrayForXYUser(UserId); // event-rank
-			eventNumberInLogtoUser = dbService.eventNumberInLogtoUser(UserId); // event - log fájlban megjelenes szama adott usernek
+			EventRankhm = dbService.getEventIdArrayForXYUserV2(UserId); // event-rank
+			//eventNumberInLogtoUser = dbService.eventNumberInLogtoUser(UserId); // event - log fájlban megjelenes szama adott usernek
 			
 			int eventcountermax = 1;			// userhez tartozo max kattintas
 			for(Entry<Integer, Integer> entry : eventNumberInLogtoUser.entrySet()){
@@ -71,9 +71,9 @@ public class RecommendationAccuracy {
 	public static HashMap<Integer,Double> accuracyModTwo() throws SQLException{
 		
 		HashMap<Integer,Double> UserRmsHm = new HashMap<Integer,Double>();
-		ClientDbService dbService = ClientDbServiceCreator.createCloud();
+		RecommenderDbService dbService = RecommenderDbServiceCreator.createCloud();
 		List<Integer> UserArray = new ArrayList<Integer>();
-		UserArray = dbService.getUserIdArrayFromTestUser();
+		UserArray = dbService.getUserIdArray();
 		HashMap<Integer,Double> EventRankhm = new HashMap<Integer,Double>();
 		HashMap<Integer,Integer> eventNumberInLogtoUser = new HashMap<Integer,Integer>();
 		
@@ -81,8 +81,8 @@ public class RecommendationAccuracy {
 		
 		for(int i=0; i<UserArray.size(); i++){	// usereken megy vegig
 			int UserId = UserArray.get(i);
-			EventRankhm = dbService.getEventIdArrayForXYUser(UserId); // event-rank
-			eventNumberInLogtoUser = dbService.eventNumberInLogtoUser(UserId); // event - log fájlban megjelenes szama adott usernek
+			EventRankhm = dbService.getEventIdArrayForXYUserV2(UserId); // event-rank
+			//eventNumberInLogtoUser = dbService.eventNumberInLogtoUser(UserId); // event - log fájlban megjelenes szama adott usernek
 			
 			int eventcountermax = 1;			// userhez tartozo max kattintas
 			for(Entry<Integer, Integer> entry : eventNumberInLogtoUser.entrySet()){
@@ -121,9 +121,9 @@ public class RecommendationAccuracy {
 	public static void accuracyModThree() throws SQLException {
 		
 	//	HashMap<Integer,Double> UserRmsHm = new HashMap<Integer,Double>();
-		ClientDbService dbService = ClientDbServiceCreator.createCloud();
+		RecommenderDbService dbService = RecommenderDbServiceCreator.createCloud();
 		List<Integer> UserArray = new ArrayList<Integer>();
-		UserArray = dbService.getUserIdArrayFromTestUser();
+		UserArray = dbService.getUserIdArray();
 		HashMap<Integer,Double> EventRankhm = new HashMap<Integer,Double>();
 		HashMap<Integer,Integer> eventNumberInLogtoUser = new HashMap<Integer,Integer>();
 		
@@ -132,8 +132,8 @@ public class RecommendationAccuracy {
 		
 		for(int i=0; i<UserArray.size(); i++){	// usereken megy vegig
 			int UserId = UserArray.get(i);
-			EventRankhm = dbService.getEventIdArrayForXYUser(UserId); // event-rank
-			eventNumberInLogtoUser = dbService.eventNumberInLogtoUser(UserId); // event - log fájlban megjelenes szama adott usernek
+			EventRankhm = dbService.getEventIdArrayForXYUserV2(UserId); // event-rank
+			//eventNumberInLogtoUser = dbService.eventNumberInLogtoUser(UserId); // event - log fájlban megjelenes szama adott usernek
 			
 			int summaKattintas = 0;			// userhez tartozo osszes kattintas
 			for(Entry<Integer, Integer> entry : eventNumberInLogtoUser.entrySet()){

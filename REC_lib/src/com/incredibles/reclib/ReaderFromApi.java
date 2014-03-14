@@ -31,7 +31,7 @@ public class ReaderFromApi extends Readerv2{
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
 			if(selectTestSetCreator.equals(TEST_WITHOUT_TEST_DATASET)){
-				while (dbService.getNextLogLine(logLine)) {
+				while (dbService.getNextLogLineV2(logLine)) {
 					Integer intUser = logLine.userId;
 					String userID = intUser.toString();
 					Integer intEvent = logLine.eventId;
@@ -52,7 +52,7 @@ public class ReaderFromApi extends Readerv2{
 				}
 				System.out.println("ESEMeny_"+dbLine);
 			}else if(selectTestSetCreator.equals(TEST_WITH_TIME_INTERVALL)){
-				while (dbService.getNextLogLine(logLine)){
+				while (dbService.getNextLogLineV2(logLine)){
 					Integer intUser = logLine.userId;
 					String userID = intUser.toString();
 					Integer intEvent = logLine.eventId;
@@ -92,7 +92,7 @@ public class ReaderFromApi extends Readerv2{
 				}
 			}
 			System.out.println(dbLine);
-		} catch (SQLException | IOException e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally {
@@ -115,7 +115,7 @@ public class ReaderFromApi extends Readerv2{
 			dbService = RecommenderDbServiceCreator.createCloud();
 			/*ReadedMatrix is set with Training dataset, so the test dataset maker function is important*/
 			if(selectTestSetCreator.equals(TEST_WITH_TIME_INTERVALL)){
-				while (dbService.getNextLogLine(logLine)){
+				while (dbService.getNextLogLineV2(logLine)){
 					Integer intUser = logLine.userId;
 					String userID = intUser.toString();
 					Integer intEvent = logLine.eventId;
@@ -151,7 +151,7 @@ public class ReaderFromApi extends Readerv2{
 					
 				}				
 			}else if(selectTestSetCreator.equals(TEST_WITHOUT_TEST_DATASET)){
-				while (dbService.getNextLogLine(logLine)){
+				while (dbService.getNextLogLineV2(logLine)){
 					Integer intUser = logLine.userId;
 					String userID = intUser.toString();
 					Integer intEvent = logLine.eventId;
@@ -187,7 +187,7 @@ public class ReaderFromApi extends Readerv2{
 			}else{
 				System.out.println("WRONG TEST DATASET MAKER NUMBER TO MAKE READEDMATRIX");
 			}
-		} catch (IOException | SQLException e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally {

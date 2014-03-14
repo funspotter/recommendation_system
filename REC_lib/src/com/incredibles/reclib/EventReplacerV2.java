@@ -16,9 +16,6 @@ import java.util.Map.Entry;
 
 import com.incredibles.data.LogTableInfoClass;
 import com.incredibles.data.LogTableTypes;
-import com.incredibles.reclib.EventReplacerV1.OldNewestDate;
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
 import com.incredibles.storage.LogLine;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
@@ -86,31 +83,7 @@ public class EventReplacerV2 {
 		Date currentTimeDate = new Date(timestamp);
 		return currentTimeDate;
 	}
-	
-	/** Get clicked info from log in LOGTABLEINFOCLASS class NOT USED*/
-	public List<LogTableInfoClass> getInformationFromLog(int type, int userId){
-		List<LogTableInfoClass> list = null;
-		RecommenderDbService dbService = null;
-		try {
-			dbService = RecommenderDbServiceCreator.createCloud();
-			list = dbService.getInfoFromLog(type, userId);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}finally {
-			if (dbService != null) {
-				try {
-					dbService.close();
-				} catch (SQLException | IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		// first hashmap: eventid - timestamp
-		// second hashmap: eventid - number
-		return list;
-	}
-	
+		
 	/** Read from Test-Log every line, and store specified log types in specific objects*/
 	public void getAllInfoFromLog(HashMap<Integer, HashMap<Integer, OldNewestDate>> displayedEventsAndTimestamp2, HashMap<Integer, HashMap<Integer, Integer>> clickedEventsAndTimestamp2){
 		RecommenderDbService dbService = null;
@@ -281,7 +254,7 @@ public class EventReplacerV2 {
 		RecommenderDbService dbService = null;
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
-			dbService.insertRECLogV2(info, userID);
+			dbService.insertRecommendationLog(info, userID);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import com.incredibles.data.Rec;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
-import com.incredibles.storage.Utils;
 
 public class CalculateFirstStepV2 {
 

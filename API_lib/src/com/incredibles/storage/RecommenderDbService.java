@@ -17,54 +17,9 @@ import com.incredibles.data.Rec;
 /**
  	* Interface that is used by the recommender when accessing the persistent store 
  */
-	public interface RecommenderDbService extends ClientDbService {
-
-	/**
-	 * Get the next line of the log, wich contains that wich user clicked on
-	 * wich event and when did that happen
-	 * 
-	 * @param line
-	 *            {@link LogLine} instance in wich the data of the next line
-	 *            will be written
-	 * 
-	 * @throws IOException
-	 *             If an error occured while reading the next line
-	 * 
-	 * @return If there are more lines in the log
-	 * @throws SQLException 
-	 */
-	public boolean getNextLogLine(LogLine line) throws IOException, SQLException;
-	
-	/**
-	 * Upload that wich event is recommended to wich user, and on wich weighted place (rank)
-	 * 
-	 * @param userID The id of the user to wich the recommendation was made
-	 * @param eventID The id of the event wich was recommended to the user
-	 * @param rank The weighted rank of the recommendation
-	 * @throws SQLException 
-	 */
-
-	Integer getUserBirthDate(Long facebookId) throws SQLException;
-	
-	
-	/*Returns Legit events Descriptio, and name*/
-	List<HashMap<Integer,String>> getExistEventDescAndName(long from) throws SQLException;
-
-	public void copyFromRecToRecP() throws SQLException;
-	
-	public void updateRecP(int userid, LinkedHashMap<Integer, Double> uploadableEvents);
-	
-	HashMap<Integer, String> getEventsGenreFromDate(long fromDate) throws SQLException;
-	
-	public List<LogTableInfoClass> getInfoFromLog(int type,int userId) throws SQLException;
-
-	HashMap<Integer, Double> getRankforEvent(Integer userid) throws SQLException;
-	
-	public void deleteInfoFromLog(LogTableInfoClass deleteThis) throws SQLException;
-
-	List<Integer> eventsInShowList(int from) throws SQLException;
-	
-	public List<Integer> getLegitEventsNumber(Date from, Date to);
+public interface RecommenderDbService {
+		
+	void close() throws IOException, SQLException;
 	
 	/*-----------------------------new db functions------------------------------*/
 	
@@ -147,14 +102,6 @@ import com.incredibles.data.Rec;
 	
 	/**Insert new log line into RecommendationLogs*/
 	public void insertRecommendationLog(String comment, Integer UserID);
-	
-	
-	
-	/**Insert a line into RecommendationLog
-	 * - gravity
-	 * - second step
-	 * - iALS*/
-	public String insertRECLogV2(String comment, Integer UserId) throws SQLException;
 	
 	/**Insert newly calculated rank values for user event pairs
 	 * - Rank values should be descending order.

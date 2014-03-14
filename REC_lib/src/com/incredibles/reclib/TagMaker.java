@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.incredibles.data.Like;
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
 
 public class TagMaker {
 	
 	
 	public void makeTagForAllEvents() throws SQLException{
-		ClientDbService dbService = null;
+		RecommenderDbService dbService = null;
 		HashMap<Integer,String> s = null;
 		
 		HashMap<Integer, Integer> feltoltendo = new HashMap<Integer, Integer>();
 		
-		dbService = ClientDbServiceCreator.createCloud();
-		s = dbService.getAllEventDesc();
+		dbService = RecommenderDbServiceCreator.createCloud();
+		s = dbService.getAllEventDescV2();
 		
 	     for (Entry<Integer, String> entry : s.entrySet()) {
 	        Integer id = entry.getKey();
@@ -31,16 +31,16 @@ public class TagMaker {
 			feltoltendo.put(id, Integer.valueOf(classNum));
 		}
 	     
-	     dbService.uploadAllEventsTag(feltoltendo);
+	     //dbService.uploadAllEventsTag(feltoltendo);
 		
 	}
 	
 	public void uploadTags(long fbuserid){//feltolti a tageket adott userhez
 		List<String> l = getLikeName(fbuserid);
-		ClientDbService dbService = null;
+		RecommenderDbService dbService = null;
 		try {
-			dbService = ClientDbServiceCreator.createCloud();
-			dbService.uploadEventTag(l);
+			dbService = RecommenderDbServiceCreator.createCloud();
+			//dbService.uploadEventTag(l);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,13 +56,13 @@ public class TagMaker {
 	}
 	
 	public List<String> getLikeName(long fbuserid){//kiszedi az osszes like nevet
-		ClientDbService dbService = null;
+		RecommenderDbService dbService = null;
 		List<Like> mp = null;
 		List<String> tagArray = new ArrayList<String>();
 
 		try {
-			dbService = ClientDbServiceCreator.createCloud();
-			mp = dbService.getAllLikeForFbUserId(fbuserid);
+			dbService = RecommenderDbServiceCreator.createCloud();
+			mp = dbService.getAllLikeForFbUserIdV2(fbuserid);
 			
 			for(int i = 0;i<mp.size();i++){
 				Like l = mp.get(i);

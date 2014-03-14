@@ -16,8 +16,6 @@ import org.jblas.DoubleMatrix;
 
 import cern.colt.matrix.impl.SparseDoubleMatrix2D;
 
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
 
@@ -36,22 +34,22 @@ public class UltimateiALS {
 	
 	public void runUltimateiALS(int userid){
 		
-		ClientDbService dbService = null;
-		try {
-			dbService = ClientDbServiceCreator.createCloud();
-			dbService.copyNewEventsToOldUsers();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}	finally {
-			if (dbService != null) {
-				try {
-					dbService.close();
-				} catch (SQLException | IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+//		ClientDbService dbService = null;
+//		try {
+//			dbService = ClientDbServiceCreator.createCloud();
+//			dbService.copyNewEventsToOldUsers();
+//		} catch (SQLException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}	finally {
+//			if (dbService != null) {
+//				try {
+//					dbService.close();
+//				} catch (SQLException | IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 		
 		
 		try {
@@ -145,7 +143,7 @@ public class UltimateiALS {
 			List<Integer> events = new ArrayList<Integer>();
 			try {
 				dbService = RecommenderDbServiceCreator.createCloud();
-				events = dbService.eventsInShowList(1);
+				//events = dbService.eventsInShowList(1);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -167,7 +165,7 @@ public class UltimateiALS {
 			RecommenderDbService dbService = null;
 			try {
 				dbService = RecommenderDbServiceCreator.createCloud();
-				eventIDRank = dbService.getRankforEvent(userID);
+				eventIDRank = dbService.getRankforEventV2(userID);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -189,7 +187,7 @@ public class UltimateiALS {
 			RecommenderDbService dbService = null;
 			try {
 				dbService = RecommenderDbServiceCreator.createCloud();
-				dbService.updateRecP(userId,newRankHm);
+				dbService.updateRecPV3(userId,newRankHm);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

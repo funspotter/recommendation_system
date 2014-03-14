@@ -31,10 +31,7 @@ public class ToJsonEvent extends Event  {
 		super(Type.MOVIE);
 	}
 
-	@Override
-	public void accept(EventVisitor visitor) {
-		
-	}
+	
 
 	public long getGo() {
 		return go;

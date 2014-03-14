@@ -160,7 +160,7 @@ public class Recallv2 {
 		List<Integer> legitEventList = null;
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
-			legitEventList = dbService.getLegitEventsNumber(from, to);
+			legitEventList = dbService.getLegitEventsIdV2(from, to);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

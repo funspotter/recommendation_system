@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.incredibles.storage.ClientDbService;
-import com.incredibles.storage.ClientDbServiceCreator;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
 
@@ -26,6 +24,9 @@ public class UploadFiltersResultV2 {
 		
 		DiscriminatorAndLikeV2 one = new DiscriminatorAndLikeV2();
 		eventRankValues1 = one.setEventsRank(UserId);
+		
+	//	CheckinFilter chekinRanking = new CheckinFilter();
+	//	chekinRanking.setRankValuesWithCheckin(eventRankValues1, UserId);
 		
 //		FilterForCorvinus two = new FilterForCorvinus();
 //		eventRankValues2 = two.setEventsRank(fbId);
@@ -93,11 +94,11 @@ public class UploadFiltersResultV2 {
 	
 	
 	public static Integer getUserIdFromFbId(long fbId) {
-		ClientDbService dbService = null;
+		RecommenderDbService dbService = null;
 		Integer userId = null;
 		try {
-			dbService = ClientDbServiceCreator.createCloud();
-			userId = dbService.getUserIDforFbUserID(fbId);
+			dbService = RecommenderDbServiceCreator.createCloud();
+			userId = dbService.getUserIdforFacebookUserId(fbId);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

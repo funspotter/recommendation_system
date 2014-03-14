@@ -22,7 +22,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.google.gson.JsonObject;
 import com.incredibles.data.FacebookPlaceTag;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
@@ -284,8 +283,13 @@ public class DiscriminatorCategorization {
 		}
 	}
 	
+	public void faszom(){
+		insertLogInformation("4_faszom");
+	}
+	
 	/**Try to categorize all the necessary events*/
 	public void categorizing(){
+		insertLogInformation("4");
 		insertLogInformation("EventCategorizeStart");
 		HashMap<Long, Integer> FacebookEventId = getUncategorizedEventsIds();
 		HashMap<Long, FacebookPlaceTag> CategoryListNumbers = getCategoryListNumbers();

@@ -197,8 +197,6 @@ public abstract class Event implements Serializable {
 		return ret;
 	}
 	
-	public void accept(EventVisitor visitor) throws SQLException {
-		visitor.visitSimple(this);
-	}
+	
 
 }

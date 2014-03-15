@@ -67,12 +67,17 @@ public class API extends HttpServlet {
 		processRequest(request, response);
 	}
 
-	/**Upload into RecommendationLogs table informations from API calls*/
-	private void uploadRecommendationInfo(String info){
+	/**Upload into RecommendationLogs table informations from API calls
+	 * if UserId == null, uses 0.*/
+	private void uploadRecommendationInfo(String info, Integer UserId){
 		RecommenderDbService dbService2=null;
 		try {
 			dbService2 = RecommenderDbServiceCreator.createCloud();
-			dbService2.insertRecommendationLog(info, 0);
+			if(UserId!=null){
+				dbService2.insertRecommendationLog(info, UserId);
+			}else{
+				dbService2.insertRecommendationLog(info, 0);
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -117,9 +122,9 @@ public class API extends HttpServlet {
 				Runnable r = new Runnable(){
 					@Override
 					public void run() {
-						uploadRecommendationInfo("FirstTimeSecondStepStart");
+						uploadRecommendationInfo("FirstTimeSecondStepStart",UserID);
 						UploadFiltersResultV2.filterExecute(UserID);
-						uploadRecommendationInfo("FirstTimeSecondStepDone");	
+						uploadRecommendationInfo("FirstTimeSecondStepDone",UserID);	
 					}
 				};
 				Thread t = new Thread(r);
@@ -138,10 +143,10 @@ public class API extends HttpServlet {
 				Runnable r = new Runnable(){
 					@Override
 					public void run() {
-						uploadRecommendationInfo("RecMaintainStart");
+						uploadRecommendationInfo("RecMaintainStart",null);
 						RecMaintenance maintain = new RecMaintenance();
 						maintain.maintainRecTable();
-						uploadRecommendationInfo("RecMaintainDone");
+						uploadRecommendationInfo("RecMaintainDone",null);
 					}
 				};
 				Thread t = new Thread(r);
@@ -160,7 +165,7 @@ public class API extends HttpServlet {
 				Runnable r = new Runnable(){
 					@Override
 					public void run() {
-						uploadRecommendationInfo("RefreshFirstStepStart");
+						uploadRecommendationInfo("RefreshFirstStepStart",null);
 						CalculateFirstStepV2 firstStep = new CalculateFirstStepV2();
 						firstStep.startAutomaticFirstStepRefresh();
 					}
@@ -191,14 +196,10 @@ public class API extends HttpServlet {
 				Thread t = new Thread(r);
 				t.start();
 			}else if(request.getParameter("cmd").equals("categorizeFacebookEventsOnce")){
-				uploadRecommendationInfo("1");
 				Runnable r = new Runnable(){
 					@Override
 					public void run() {
-						uploadRecommendationInfo("2");
-						DiscriminatorCategorization categorize = new DiscriminatorCategorization();
-						uploadRecommendationInfo("3");
-						categorize.categorizing();
+						DiscriminatorCategorization.categorizing();
 					}
 				};
 				Thread t = new Thread(r);

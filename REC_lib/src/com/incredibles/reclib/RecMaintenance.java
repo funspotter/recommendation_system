@@ -275,7 +275,7 @@ public class RecMaintenance {
 			}
 			LinkedHashMap<Integer, Double> rankValues = sortByValue(UserRanks);
 			uploadUserRec(rankValues, UserId);	// upload new rank values for user
-			uploadComment(UserId);
+			//uploadComment(UserId);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("UserID kész: "+UserId +"HashMapSize:"+rankValues.size()+" time: "+dateFormat.format(date));

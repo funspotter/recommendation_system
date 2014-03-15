@@ -37,16 +37,16 @@ import com.restfb.types.Place;
 
 public class DiscriminatorCategorization {
 	
-	String cinemaList = "Cinema";
-	String exhibitionList = "Museum/Art Gallery";
-	String gastroList = "Food/Grocery, Restaurant/Café, Restaurant/Cafe";
-	String musicList = "Concert Venue";
-	String sportList = "Attractions/Things to Do, Outdoor Gear/Sporting Goods, Sports Venue, Sports/Recreation/Activities";
-	String travelList = "Transport, Tours/Sightseeing, Spas/Beauty/Personal Care, Airport, Hotel, Landmark";
-	String partyList = "Club";
+	static String cinemaList = "Cinema";
+	static String exhibitionList = "Museum/Art Gallery";
+	static String gastroList = "Food/Grocery, Restaurant/Café, Restaurant/Cafe";
+	static String musicList = "Concert Venue";
+	static String sportList = "Attractions/Things to Do, Outdoor Gear/Sporting Goods, Sports Venue, Sports/Recreation/Activities";
+	static String travelList = "Transport, Tours/Sightseeing, Spas/Beauty/Personal Care, Airport, Hotel, Landmark";
+	static String partyList = "Club";
 	
 	/**Returns uncategorized events facebook and funspotter id*/
-	public HashMap<Long, Integer> getUncategorizedEventsIds(){
+	public static HashMap<Long, Integer> getUncategorizedEventsIds(){
 		HashMap<Long, Integer> FacebookEventId = null;
 		RecommenderDbService dbService = null;
 		try {
@@ -68,7 +68,7 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**First categorized based on the returned facebook place category*/
-	public String easyCategorizing(String FacebookCategory){
+	public static String easyCategorizing(String FacebookCategory){
 		if(cinemaList.contains(FacebookCategory)){
 			return "Cinema";
 		}else if(exhibitionList.toLowerCase().contains(FacebookCategory.toLowerCase())){
@@ -89,7 +89,7 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**Returns CategoryList elements discriminator numbers*/
-	public HashMap<Long, FacebookPlaceTag> getCategoryListNumbers(){
+	public static HashMap<Long, FacebookPlaceTag> getCategoryListNumbers(){
 		HashMap<Long, FacebookPlaceTag> categoryDiscriminatorNumber = new HashMap<Long, FacebookPlaceTag>();
 		RecommenderDbService dbService = null;
 		try {
@@ -112,7 +112,7 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**Updates the discriminator - number hashmaps*/
-	public void putDiscriminatorNumbersIntoHashMap(HashMap<String, Integer> discriminatorNumbers, String Discriminator){
+	public static void putDiscriminatorNumbersIntoHashMap(HashMap<String, Integer> discriminatorNumbers, String Discriminator){
 		if(discriminatorNumbers.isEmpty()){
 			discriminatorNumbers.put("Cinema", 0);
 			discriminatorNumbers.put("Exhibition", 0);
@@ -142,7 +142,7 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**Add together the discriminator values*/
-	public HashMap<String, Integer> sumDiscriminatorValues(HashMap<String, Integer> oneImportant, HashMap<String, Integer> two){
+	public static HashMap<String, Integer> sumDiscriminatorValues(HashMap<String, Integer> oneImportant, HashMap<String, Integer> two){
 		if(oneImportant.isEmpty()){
 			oneImportant.put("Cinema", two.get("Cinema"));
 			oneImportant.put("Exhibition", two.get("Exhibition"));
@@ -172,7 +172,7 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**Returns one place category, and fill the onePlaceCategory hashmap with categoryList elements*/
-	public String getFacebookData(Long FacebookId, HashMap<Long, String> onePlaceCategoryList, AccessToken accessToken){
+	public static String getFacebookData(Long FacebookId, HashMap<Long, String> onePlaceCategoryList, AccessToken accessToken){
 		Event event = null;
 		Place place = null;
 		String categoryString = null;
@@ -223,7 +223,7 @@ public class DiscriminatorCategorization {
 	
 	/**Upload the newly categorized events discriminator into database
 	 * handle the events with zero facebook info from their places*/
-	public void uploadEventDiscriminators(HashMap<Integer, String> newEventDiscriminator, List<Integer>noInfoFromFacebook){
+	public static void uploadEventDiscriminators(HashMap<Integer, String> newEventDiscriminator, List<Integer>noInfoFromFacebook){
 		RecommenderDbService dbService = null;
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
@@ -243,7 +243,7 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**Upload all of the categoryList elements into table with the new discriminator numbers*/
-	public void uploadCategoryListElements(HashMap<Long, FacebookPlaceTag> CategoryListElements, HashMap<Long, FacebookPlaceTag> oldCategoryListElements){
+	public static void uploadCategoryListElements(HashMap<Long, FacebookPlaceTag> CategoryListElements, HashMap<Long, FacebookPlaceTag> oldCategoryListElements){
 		RecommenderDbService dbService = null;
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
@@ -264,7 +264,7 @@ public class DiscriminatorCategorization {
 	}
 	
 	/**Insert one log information to check the categorized evenst percent*/
-	public void insertLogInformation(String comment){
+	public static void insertLogInformation(String comment){
 		RecommenderDbService dbService2=null;
 		try {
 			dbService2 = RecommenderDbServiceCreator.createCloud();
@@ -282,16 +282,13 @@ public class DiscriminatorCategorization {
 			}
 		}
 	}
-	
-	public void faszom(){
-		insertLogInformation("4_faszom");
-	}
-	
+		
 	/**Try to categorize all the necessary events*/
-	public void categorizing(){
-		insertLogInformation("4");
+	public static void categorizing(){
 		insertLogInformation("EventCategorizeStart");
-		HashMap<Long, Integer> FacebookEventId = getUncategorizedEventsIds();
+		
+		HashMap<Long, Integer> FacebookEventId = getUncategorizedEventsIds();	//ÁTÍRNI CLOUDBMANAGERBEN HOGY NE AZ ÖSSZES FÁCSÉT KÉRJE LE
+		
 		HashMap<Long, FacebookPlaceTag> CategoryListNumbers = getCategoryListNumbers();
 		HashMap<Long, FacebookPlaceTag> oldCategoryListNumbers = new HashMap<Long, FacebookPlaceTag>(CategoryListNumbers);
 		HashMap<Long, String> onePlaceCategoryList = new HashMap<Long, String>();
@@ -405,10 +402,10 @@ public class DiscriminatorCategorization {
 				}
 			}
 		}
-		Double plusPercent = (double) ((sumUncatEventNum-notCategorizedEvents)/sumUncatEventNum)*100;
+		Double plusPercent = ((double)(sumUncatEventNum-notCategorizedEvents)/(double)sumUncatEventNum)*100;
 		DecimalFormat df = new DecimalFormat("##");
-        System.out.print(df.format(plusPercent));
-		uploadEventDiscriminators(newEventDiscriminator,noInfoFromFacebook);
+		insertLogInformation("EventCategorizationEventUploadStart");
+		uploadEventDiscriminators(newEventDiscriminator,null);
 		insertLogInformation("EventCategorizeEnd +: "+df.format(plusPercent)+"% startUncat: "+sumUncatEventNum);
 	}
 	

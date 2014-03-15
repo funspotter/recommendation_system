@@ -15,4 +15,8 @@
 		<item value="false" key="CREATE_GETTER_SETTER"/>
 		<item value="false" key="moveWizard.updateQualifiedNames"/>
 	</section>
+	<section name="InferTypeArguments">
+		<item value="true" key="leaveUnconstrainedRaw"/>
+		<item value="true" key="assumeCloneReturnsSameType"/>
+	</section>
 </section>

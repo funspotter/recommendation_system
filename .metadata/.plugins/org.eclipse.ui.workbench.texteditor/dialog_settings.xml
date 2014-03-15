@@ -3,28 +3,29 @@
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="302" key="DIALOG_WIDTH"/>
 		<item value="337" key="DIALOG_Y_ORIGIN"/>
-		<item value="805" key="DIALOG_X_ORIGIN"/>
 		<item value="399" key="DIALOG_HEIGHT"/>
+		<item value="805" key="DIALOG_X_ORIGIN"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
-		<item value="false" key="casesensitive"/>
 		<item value="false" key="isRegEx"/>
+		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="insertRecommendationLog" key="selection"/>
+		<item value="DiscriminatorAndLike" key="selection"/>
 		<list key="findhistory">
-			<item value="insertRecommendationLog"/>
-			<item value="getAllUn"/>
-			<item value="updateFacebookPlaceTagTable"/>
-			<item value="getFacebookPlaceTagTable"/>
-			<item value="getAllEventFacebookAndFunspotterId"/>
-			<item value="updateEventsDiscriminator"/>
-			<item value="upload"/>
-			<item value="discriminator"/>
+			<item value="DiscriminatorAndLike"/>
+			<item value="insert"/>
+			<item value="insertRe"/>
+			<item value="ins"/>
+			<item value="DEBUG"/>
+			<item value="hcsaba"/>
+			<item value="USER_NAME"/>
+			<item value="close"/>
 		</list>
 		<list key="replacehistory">
+			<item value="DiscriminatorAndLikeV2"/>
 			<item value=""/>
 		</list>
 	</section>

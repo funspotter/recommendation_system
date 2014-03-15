@@ -1,3 +1,4 @@
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -5,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 
 
 
@@ -82,10 +84,19 @@ public class Main {
 	
 		
 		
-		DiscriminatorCategorization categor = new DiscriminatorCategorization();
-		categor.categorizing();
+//		DiscriminatorCategorization categor = new DiscriminatorCategorization();
+//		categor.categorizing();
 		
-		
+//		Double plusPercent = (double) ((double)(1/12)*100);
+//		DecimalFormat df = new DecimalFormat("##.#");
+//        System.out.print(df.format(plusPercent));
+		double d = 12.34567;
+		double valami = ((double)(15-5)/(double)12)*100;
+		//System.out.println(valami);
+        DecimalFormat df = new DecimalFormat("##.##");
+        System.out.print(df.format(valami));
+		//uploadEventDiscriminators(newEventDiscriminator,null);
+		//insertLogInformation("EventCategorizeEnd +: "+df.format(plusPercent)+"% startUncat: "+sumUncatEventNum);
 		
 //		ReaderFromFile uj = new ReaderFromFile();
 //		uj.ExecuteReading();

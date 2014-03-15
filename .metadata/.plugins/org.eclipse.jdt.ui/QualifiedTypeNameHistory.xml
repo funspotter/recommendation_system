@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="com.incredibles.data.MetadataFromThirdParty"/>
 <fullyQualifiedTypeName name="com.incredibles.reclib.EventReplacerV2.OldNewestDate"/>
 <fullyQualifiedTypeName name="de.umass.lastfm.User"/>
 <fullyQualifiedTypeName name="java.util.Date"/>
@@ -16,7 +15,6 @@
 <fullyQualifiedTypeName name="com.incredibles.reclib.RecMaintenance"/>
 <fullyQualifiedTypeName name="java.lang.Integer"/>
 <fullyQualifiedTypeName name="com.incredibles.reclib.DiscriminatorAndLikeV2"/>
-<fullyQualifiedTypeName name="com.incredibles.reclib.UploadFiltersResultV2"/>
 <fullyQualifiedTypeName name="java.lang.Math"/>
 <fullyQualifiedTypeName name="java.sql.Timestamp"/>
 <fullyQualifiedTypeName name="java.text.DateFormat"/>
@@ -33,7 +31,6 @@
 <fullyQualifiedTypeName name="com.restfb.types.Checkin"/>
 <fullyQualifiedTypeName name="com.mysql.jdbc.PreparedStatement"/>
 <fullyQualifiedTypeName name="java.util.Iterator"/>
-<fullyQualifiedTypeName name="com.incredibles.reclib.CheckinFilter"/>
 <fullyQualifiedTypeName name="java.sql.ResultSet"/>
 <fullyQualifiedTypeName name="java.util.Map.Entry"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
@@ -49,8 +46,6 @@
 <fullyQualifiedTypeName name="com.restfb.json.JsonException"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 <fullyQualifiedTypeName name="com.incredibles.reclib.DiscriminatorCategorization.PlaceTag"/>
-<fullyQualifiedTypeName name="com.incredibles.storage.RecommenderDbService"/>
-<fullyQualifiedTypeName name="com.incredibles.storage.RecommenderDbServiceCreator"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="org.json.simple.JSONArray"/>
 <fullyQualifiedTypeName name="org.json.simple.JSONObject"/>
@@ -58,6 +53,11 @@
 <fullyQualifiedTypeName name="java.sql.PreparedStatement"/>
 <fullyQualifiedTypeName name="com.incredibles.data.FacebookPlaceTag"/>
 <fullyQualifiedTypeName name="java.text.DecimalFormat"/>
-<fullyQualifiedTypeName name="com.incredibles.reclib.DiscriminatorCategorization"/>
 <fullyQualifiedTypeName name="RunFacebookEventCategorization"/>
+<fullyQualifiedTypeName name="com.incredibles.storage.RecommenderDbService"/>
+<fullyQualifiedTypeName name="com.incredibles.storage.RecommenderDbServiceCreator"/>
+<fullyQualifiedTypeName name="com.incredibles.reclib.CheckinFilter"/>
+<fullyQualifiedTypeName name="com.incredibles.reclib.UploadFiltersResultV2"/>
+<fullyQualifiedTypeName name="java.util.Collections"/>
+<fullyQualifiedTypeName name="com.incredibles.reclib.DiscriminatorCategorization"/>
 </qualifiedTypeNameHistroy>

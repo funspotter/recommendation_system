@@ -77,7 +77,7 @@ public class CalculateFirstStepV2 {
 				}
 			}
 		};
-		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 1, 7, TimeUnit.HOURS);
+		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 1, 4, TimeUnit.HOURS);
 	}
 	
 	public static LinkedHashMap<Integer, Double> sortByValue(Map<Integer, Double> map) {

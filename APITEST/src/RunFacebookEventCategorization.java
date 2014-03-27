@@ -22,7 +22,7 @@ private final ScheduledExecutorService scheduler = Executors.newScheduledThreadP
 				categorize.categorizing();
 			}
 		};
-		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 7, TimeUnit.HOURS);
+		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 2, 24, TimeUnit.HOURS);
 	}
 	
 }

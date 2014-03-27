@@ -235,7 +235,6 @@ public class DiscriminatorAndLikeV2{
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
 			eventGenre = dbService.getEventsTagFromDateV2(date);
-			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -302,14 +301,14 @@ public class DiscriminatorAndLikeV2{
 		/*Counting elements of discriminators number*/
 		for (Entry<String, Integer> entry : discNumber.entrySet()) {
 			Integer csopCount = entry.getValue();
-		    sum += csopCount;			
+			sum = sum + csopCount;		
 		}
 		for (Entry<String, Integer> entry : discNumber.entrySet()) {
 			String discriminator = entry.getKey();
 			Integer discCount = entry.getValue();
-			if(discCount != 0 && sum!= 0){
+			if(!discCount.equals(0) && !sum.equals(0)){
 				rank = (double)discCount/(double)sum;
-			}else if(sum!=0 && discCount == 0){
+			}else if(!sum.equals(0) && discCount.equals(0)){
 				rank = 1.0/(double)sum;
 			}else{
 				rank = (double) 0;
@@ -323,8 +322,8 @@ public class DiscriminatorAndLikeV2{
 	public static void likeCountPlusPlus(HashMap<String, Integer> discNumber, String category) {
 		if (discNumber.containsKey(category)) {
 			Integer counter = discNumber.get(category);
-			counter = counter + 1;						// Not new discriminator +1;
-			discNumber.put(category, counter);
+			Integer newCounter = counter + 1;						// Not new discriminator +1;
+			discNumber.put(category, newCounter);
 		} else {
 			discNumber.put(category, 1);				// new disc =1;
 		}
@@ -397,7 +396,8 @@ public class DiscriminatorAndLikeV2{
 						String oneTag = tagArray.get(j).toLowerCase();
 						if(allCinemaLikeGenre.containsKey(oneTag)){
 							double genreNumber = allCinemaLikeGenre.get(oneTag);
-							allCinemaLikeGenre.put(oneTag, genreNumber++);
+							double newNumber = genreNumber+1;
+							allCinemaLikeGenre.put(oneTag, newNumber);
 						}else{
 							allCinemaLikeGenre.put(oneTag, 1.0);
 						}
@@ -425,7 +425,8 @@ public class DiscriminatorAndLikeV2{
 						String oneTag = tagArray.get(j).toLowerCase();
 						if(allMusicLikeGenre.containsKey(oneTag)){
 							double genreNumber = allMusicLikeGenre.get(oneTag);
-							allMusicLikeGenre.put(oneTag, genreNumber++);
+							double newNumber = genreNumber+1;
+							allMusicLikeGenre.put(oneTag, newNumber);
 						}else{
 							allMusicLikeGenre.put(oneTag, 1.0);
 						}
@@ -450,8 +451,8 @@ public class DiscriminatorAndLikeV2{
 		}
 		
 		/*upload in new thread the tags*/
-		final HashMap<Long, MetadataFromThirdParty> newTagsforUploadImdbFinal = newTagsforUploadImdb;
-		final HashMap<Long, MetadataFromThirdParty> newTagsforUploadLastfmFinal = newTagsforUploadLastfm;
+		final HashMap<Long, MetadataFromThirdParty> newTagsforUploadImdbFinal = new HashMap<Long, MetadataFromThirdParty>(newTagsforUploadImdb);
+		final HashMap<Long, MetadataFromThirdParty> newTagsforUploadLastfmFinal = new HashMap<Long, MetadataFromThirdParty>(newTagsforUploadLastfm);
 	 	Runnable r = new Runnable(){
 			@Override
 			public void run() {
@@ -481,9 +482,9 @@ public class DiscriminatorAndLikeV2{
 		HashMap <String,Double> allCinemaLikeGenre = hashmaps.get(1);
 		HashMap <String,Double> allMusicLikeGenre = hashmaps.get(2);
 		Date nowDate = new Date();
-		List <Integer> eventList = getEventsFromDate(nowDate.getTime());	// dont need to give date. handeled in cloudbmanager
-		HashMap<Integer,String> eventDiscriminator = getEventsDiscriminatorFromDate(nowDate.getTime());	// TODO: hozzaadni az idointervallumot
-		HashMap<Integer,List<String>> eventGenre = getEventsGenreFromDate(nowDate.getTime());	// TODO: hozzaadni az idointervallumot
+		List <Integer> eventList = getEventsFromDate(nowDate.getTime());
+		HashMap<Integer,String> eventDiscriminator = getEventsDiscriminatorFromDate(nowDate.getTime());
+		HashMap<Integer,List<String>> eventGenre = new HashMap<Integer, List<String>>();//getEventsGenreFromDate(nowDate.getTime());
 		Integer ageInYears = getUserBirtdate(UserId); /*users age*/
 		
 		HashMap<Integer, Double> eventsRank = new HashMap<Integer, Double>();
@@ -491,17 +492,11 @@ public class DiscriminatorAndLikeV2{
 		
 		HashMap<Integer, HashMap<String, Double>> userDiscriminatorRanks = new HashMap<Integer, HashMap<String, Double>>();
 		userDiscriminatorRanks.put(UserId, discRank);
-		final HashMap<Integer, HashMap<String, Double>> userDiscriminatorRanksFinal = userDiscriminatorRanks;
-		Runnable r = new Runnable(){
-			@Override
-			public void run() {
-				uploadUserDiscriminatorRank(userDiscriminatorRanksFinal);
-			}
-		};
-		Thread t = new Thread(r);
-		t.start();
+		System.out.println("discriminatorrank feltoltes ---------"+UserId);
+		uploadUserDiscriminatorRank(userDiscriminatorRanks);
 		
 		for(int i=0; i<eventList.size(); i++){
+			boolean legitEvent = true;
 			Integer eventId = eventList.get(i);
 			String discriminator = "makiverem";
 			String valami = eventDiscriminator.get(eventId);
@@ -546,15 +541,18 @@ public class DiscriminatorAndLikeV2{
 				ujrank = rank + (Math.random()/100);	/*Default setting*/
 			}else if(discriminator.equals("simple")){
 				ujrank = (double) 0;					/*Not categorised yet in database*/
+				legitEvent = false;
 			}else{
 				ujrank = (double) 0;					/*Other discriminator problem*/
+				legitEvent = false;
 			}
 			
 			/*New database system needs to upload event-rank pairs in Linked HashMap*/
-			eventsRank.put(eventId, ujrank);
-			System.out.println(" EventId:" +eventId+ " Discriminator:" +discriminator+ " Rank:" +ujrank);
-		}
-				
+			if(legitEvent == true){
+				eventsRank.put(eventId, ujrank);
+				System.out.println(" EventId:" +eventId+ " Discriminator:" +discriminator+ " Rank:" +ujrank);
+			}
+		}	
 		System.out.println("V�GZETT AZ EVENTEKKEL");
 		return eventsRank;
 	}
@@ -574,7 +572,6 @@ public class DiscriminatorAndLikeV2{
         return result;
     }
 
-	
 	/**Maximum value in <String, Double> hashmap*/
 	public static Double maximumValueInHashmap(HashMap<String, Double> hm){
 		Double max = 0.0;

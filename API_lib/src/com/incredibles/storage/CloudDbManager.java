@@ -161,7 +161,7 @@ class CloudDbManager implements RecommenderDbService {
 	/*-----------------------------new db functions------------------------------*/
 	
 	
-	/**Returns true if has next line, and loadup LogLine object with data*/
+	/*Returns true if has next line, and loadup LogLine object with data*/
 	public boolean getNextLogLineV2(LogLine line) throws SQLException {	
 		boolean ret = false;	/*default false*/
 		Statement getLogStatement = null;
@@ -194,7 +194,7 @@ class CloudDbManager implements RecommenderDbService {
 		return ret;
 	}
 
-	/**Returns all events id in a string list*/
+	/*Returns all events id in a string list*/
 	public List<Integer> getAllEventsId(){
 		PreparedStatement getEventStatement = null;
 		ResultSet eventResult = null;
@@ -231,7 +231,7 @@ class CloudDbManager implements RecommenderDbService {
 		return eventList;
 	}
 	
-	/**Returns events id which have future show 
+	/*Returns events id which have future show 
 	 * - uses two Date time interval and convert these into integer dates*/
 	public List<Integer> getLegitEventsIdV2(Date from, Date to){
 		PreparedStatement getEventStatement = null;
@@ -273,7 +273,7 @@ class CloudDbManager implements RecommenderDbService {
 		return eventList;
 	}
 
-	/**Returns legit events in int List.*/
+	/*Returns legit events in int List.*/
 	public List<Integer> getLegitEventsIdFromDate(long from){
 		List<Integer> eventIdList = new ArrayList<Integer>();
 		Integer intDate = getIntegerDate(from);		
@@ -316,7 +316,7 @@ class CloudDbManager implements RecommenderDbService {
 		return eventIdList;
 	}
 	
-	/**Get legit events with isIn=0 flag. In the maintanence class call this first, before uploadIsinFlagForEvents() !!!*/
+	/*Get legit events with isIn=0 flag. In the maintanence class call this first, before uploadIsinFlagForEvents() !!!*/
 	public List<Integer> getLegitNotinEventsIdFromDate(long from){
 		List<Integer> eventIdList = new ArrayList<Integer>();
 		Integer intDate = getIntegerDate(from);		
@@ -357,7 +357,7 @@ class CloudDbManager implements RecommenderDbService {
 		return eventIdList;
 	}
 	
-	/**Returns all events in hashmap with ISIn value.*/
+	/*Returns all events in hashmap with ISIn value.*/
 	public HashMap<Integer, Boolean> getAllEventsWithIsinFlag(){
 		PreparedStatement getEventStatement = null;
 		ResultSet eventResult = null;
@@ -395,7 +395,7 @@ class CloudDbManager implements RecommenderDbService {
 		return eventIdIsinHm;
 	}
 	
-	/**Returns legit events click number from EventLogs Table*/
+	/*Returns legit events click number from EventLogs Table*/
 	public HashMap<Integer, Integer> countLegitEventsClick(){
 		PreparedStatement logStatement = null;
 		ResultSet resultSet = null;
@@ -446,7 +446,7 @@ class CloudDbManager implements RecommenderDbService {
 		return clickNum;
 	}
 	
-	/**Returns a hasmap with event-rank key;value for one user*/
+	/*Returns a hasmap with event-rank key;value for one user*/
 	public HashMap<Integer,Double> getRankforEventV2(Integer userid) throws SQLException{	
 		HashMap<Integer,Double> s = new HashMap<Integer,Double>();
 		PreparedStatement getShowsStatement = null;
@@ -472,7 +472,7 @@ class CloudDbManager implements RecommenderDbService {
 		return s;
 	}
 	
-	/**Returns list of hasmaps. 0. - eventName; 1- eventDesc.*/
+	/*Returns list of hasmaps. 0. - eventName; 1- eventDesc.*/
 	public List<HashMap<Integer,String>> getLegitEventDescAndNameFromDate(long from) throws SQLException{
 		HashMap<Integer,String> eventDesc = new HashMap<Integer,String>();
 		HashMap<Integer,String> eventName = new HashMap<Integer,String>();
@@ -510,7 +510,7 @@ class CloudDbManager implements RecommenderDbService {
 		return hashmapList;
 	}
 
-	/**Returns all event description in hm (eventid - description string)*/	//make one for date
+	/*Returns all event description in hm (eventid - description string)*/	//make one for date
 	public HashMap<Integer,String> getAllEventDescV2() throws SQLException{
 		HashMap<Integer,String> s = new HashMap<Integer,String>();
 		PreparedStatement getEventStatement = null;
@@ -535,7 +535,7 @@ class CloudDbManager implements RecommenderDbService {
 		return s;
 	}
 	
-	/**Returns events description from date. Uses converted long number for date*/
+	/*Returns events description from date. Uses converted long number for date*/
 	public HashMap<Integer,String> getEventDescriptionFromDateV2(long fromDate) throws SQLException{
 		HashMap<Integer,String> s = new HashMap<Integer,String>();
 		Integer date = getIntegerDate(fromDate);
@@ -562,7 +562,7 @@ class CloudDbManager implements RecommenderDbService {
 		return s;
 	}
 	
-	/**Returns all event discriminator in a hasmap*/ //make one for date
+	/*Returns all event discriminator in a hasmap*/ //make one for date
 	public HashMap<Integer,String> getAllEventDiscV2() throws SQLException{
 		HashMap<Integer,String> s = new HashMap<Integer,String>();
 		PreparedStatement getEventStatement = null;
@@ -587,7 +587,7 @@ class CloudDbManager implements RecommenderDbService {
 		return s;
 	}
 	
-	/**Return events discriminator FROM DATE in HM (eventid - discriminator)*/
+	/*Return events discriminator FROM DATE in HM (eventid - discriminator)*/
 	public HashMap<Integer,String> getEventDiscriminatorFromDateV2(long fromDate) throws SQLException{
 		HashMap<Integer,String> s = new HashMap<Integer,String>();
 		Integer date = getIntegerDate(fromDate);
@@ -614,7 +614,7 @@ class CloudDbManager implements RecommenderDbService {
 		return s;
 	}
 	
-	/**Update events discriminator and isOk value, handle the noinfofromfacebook case too*/
+	/*Update events discriminator and isOk value, handle the noinfofromfacebook case too*/
 	public void updateEventsDiscriminator(HashMap<Integer, String> categorizedEvents, List<Integer>noInfoFromFacebook){
 		PreparedStatement updateStatement = null;
 		Date local = new Date();
@@ -624,19 +624,21 @@ class CloudDbManager implements RecommenderDbService {
 		String queryStrUpdate = "UPDATE Events SET isOk = ?, updatedAt = ?, discriminator = ? WHERE id = ?";
 		try {
 			updateStatement = conn.prepareStatement(queryStrUpdate);
-			for(Entry<Integer, String>entry: categorizedEvents.entrySet()){
-				Integer funspotterId = entry.getKey();
-				String discriminator  = entry.getValue();
-				updateStatement.setInt(1, 1);
-				updateStatement.setTimestamp(2, ts);
-				updateStatement.setString(3, discriminator);
-				updateStatement.setInt(4, funspotterId);
-				updateStatement.addBatch();
+			if(categorizedEvents != null){
+				for(Entry<Integer, String>entry: categorizedEvents.entrySet()){
+					Integer funspotterId = entry.getKey();
+					String discriminator  = entry.getValue();
+					updateStatement.setInt(1, 1);
+					updateStatement.setTimestamp(2, ts);
+					updateStatement.setString(3, discriminator);
+					updateStatement.setInt(4, funspotterId);
+					updateStatement.addBatch();
+				}
 			}
 			if(noInfoFromFacebook!=null){
 				for(int i=0; i<noInfoFromFacebook.size(); i++){
 					Integer funspotterId = noInfoFromFacebook.get(i);
-					updateStatement.setInt(1, 3);
+					updateStatement.setInt(1, 0);
 					updateStatement.setTimestamp(2, ts);
 					updateStatement.setString(3, "simple");
 					updateStatement.setInt(4, funspotterId);
@@ -658,15 +660,15 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
-	public HashMap<Long, Integer> getAllUncategorizedFacebookEvents(){
+	/*Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getUncategorizedFacebookEvents(){
 		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
 		PreparedStatement statement= null;
 		ResultSet eventResults = null;
 		try {
 			String queryStr = "SELECT facebookId, EventId from EventFromFacebook WHERE (SELECT id FROM Events WHERE EventFromFacebook.EventId = id AND isOk = 0)";
-			String queryStr2 = "SELECT facebookId, EventId from EventFromFacebook WHERE 1";
-			statement = conn.prepareStatement(queryStr2);
+		//	String queryStr2 = "SELECT facebookId, EventId from EventFromFacebook WHERE 1";
+			statement = conn.prepareStatement(queryStr);
 			eventResults = statement.executeQuery();
 			while(eventResults.next()){
 				Long FacebookId = eventResults.getLong("facebookId");
@@ -701,7 +703,133 @@ class CloudDbManager implements RecommenderDbService {
 		return FaceAndFunspotterEventId;
 	}
 	
-	/**Returns checkin places name for one user. In the list one place can be not just one time*/
+	/*Returns all future facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllFutureFacebookEvents(){
+		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Integer Date = getIntegerDate(utc);
+		PreparedStatement statement= null;
+		ResultSet eventResults = null;
+		try {
+			String queryStr2 = "SELECT facebookId, EventId from EventFromFacebook WHERE (SELECT EventId FROM EventDays WHERE EventFromFacebook.EventId=EventId AND day >= ? LIMIT 1)";
+			statement = conn.prepareStatement(queryStr2);
+			statement.setInt(1, Date);
+			eventResults = statement.executeQuery();
+			while(eventResults.next()){
+				Long FacebookId = eventResults.getLong("facebookId");
+				Integer FunspotterId = eventResults.getInt("EventId");
+				if(FacebookId!=null && !FacebookId.equals(0L)){
+					if(FunspotterId!=null && !FunspotterId.equals(0)){
+						FaceAndFunspotterEventId.put(FacebookId, FunspotterId);
+					}
+				}	
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (eventResults != null)  {
+				try {
+					eventResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
+		return FaceAndFunspotterEventId;
+	}
+	
+	/*Returns ALL facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllFacebookEvents(){
+		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
+		PreparedStatement statement= null;
+		ResultSet eventResults = null;
+		try {
+			String queryStr2 = "SELECT facebookId, EventId from EventFromFacebook WHERE 1";
+			statement = conn.prepareStatement(queryStr2);
+			eventResults = statement.executeQuery();
+			while(eventResults.next()){
+				Long FacebookId = eventResults.getLong("facebookId");
+				Integer FunspotterId = eventResults.getInt("EventId");
+				if(FacebookId!=null && !FacebookId.equals(0L)){
+					if(FunspotterId!=null && !FunspotterId.equals(0)){
+						FaceAndFunspotterEventId.put(FacebookId, FunspotterId);
+					}
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (eventResults != null)  {
+				try {
+					eventResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
+		return FaceAndFunspotterEventId;
+	}
+	
+	/*Returns all facebook events funspotter id from EventFromFacebook table in List<Integer>*/
+	public List<Integer> getAllFacebookEventFunspotterId(){
+		List<Integer> allFacebookEventFunspotterId = new ArrayList<Integer>();
+		PreparedStatement statement= null;
+		ResultSet eventResults = null;
+		String getQuery = "SELECT EventId FROM EventFromFacebook WHERE 1";
+		try {
+			statement = conn.prepareStatement(getQuery);
+			eventResults = statement.executeQuery();
+			while(eventResults.next()){
+				Integer FunspotterId = eventResults.getInt("EventId");
+				allFacebookEventFunspotterId.add(FunspotterId);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (eventResults != null)  {
+				try {
+					eventResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return allFacebookEventFunspotterId;
+	}
+	
+	/*Returns checkin places name for one user. In the list one place can be not just one time*/
 	public List<String> getUserCheckin(Integer UserId){
 		List<String> checkinData = new ArrayList<String>();
 		PreparedStatement getCheckinStatement = null;
@@ -741,7 +869,7 @@ class CloudDbManager implements RecommenderDbService {
 		return checkinData;
 	}
 	
-	/**Returns events placenames*/
+	/*Returns events placenames*/
 	public HashMap<Integer, List<String>> getLegitEventsPlaceName(){
 		HashMap<Integer, List<String>> placeNames = new HashMap<Integer, List<String>>();
 		PreparedStatement eventStatement = null;
@@ -787,7 +915,7 @@ class CloudDbManager implements RecommenderDbService {
 		return placeNames;
 	}
 	
-	/**Upload isin flag in Events table.*/
+	/*Upload isin flag in Events table.*/
 	public void updateIsinFlagForEvents(List<Integer> legitEventsIdFromDate){
 		PreparedStatement updateStatement = null;
 		HashMap<Integer, Boolean> AllEventsWithIsinFlag = getAllEventsWithIsinFlag();
@@ -804,7 +932,7 @@ class CloudDbManager implements RecommenderDbService {
 				if(legitEventsIdFromDate.contains(EventId)){
 					if(isinFlag==true){
 						//dont do anything
-					}else{	// if event is legit(future event, and isok=1,3), but isin = false, set isin=true
+					}else{	// if event is legit(future event, and isok=1,2), but isin = false, set isin=true
 						updateStatement.setInt(1, 1);
 						updateStatement.setTimestamp(2, ts);
 						updateStatement.setInt(3, EventId);
@@ -813,7 +941,7 @@ class CloudDbManager implements RecommenderDbService {
 				}else{
 					if(isinFlag==false){
 						//dont do anything
-					}else{ //if event isnt legit (not future and/or isok=0) but isin = true
+					}else{ //if event isnt legit (not future and/or isok=0;3) but isin = true
 						updateStatement.setInt(1, 0);
 						updateStatement.setTimestamp(2, ts);
 						updateStatement.setInt(3, EventId);
@@ -835,8 +963,8 @@ class CloudDbManager implements RecommenderDbService {
 			}
 		}
 	}
-	
-	/**Returns userid list, who has record in the UserDiscriminatorsRanks table*/
+		
+	/*Returns userid list, who has record in the UserDiscriminatorsRanks table*/
 	public List<Integer> whoHasDiscRankInTable(){
 		List<Integer> usersList = new ArrayList<Integer>();
 		PreparedStatement getUserStatement = null;
@@ -873,7 +1001,7 @@ class CloudDbManager implements RecommenderDbService {
 		return usersList;
 	}
 	
-	/**Upload/Update user/users discriminator rank values*/
+	/*Upload/Update user/users discriminator rank values*/
 	public void uploadUserDiscriminatorRank(HashMap<Integer, HashMap<String, Double>> discriminatorRank){
 		PreparedStatement insertStatement = null;
 		PreparedStatement updateStatement = null;
@@ -965,8 +1093,8 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Returns for ONE or ALL USER their discriminator ranks. For one user onlyoneuser = 1.
-	 * Do not returns the 0. user disc. ranks*/
+	/*Returns for ONE or ALL USER their discriminator ranks. For one user onlyoneuser = 1.
+	 * Doesnt return the 0. user disc. ranks*/
 	public HashMap<Integer, HashMap<String, Double>> getUserDiscriminatorRank(int UserId, boolean onlyOneUser){
 		HashMap<Integer, HashMap<String, Double>> userDiscriminatorRank = new HashMap<Integer, HashMap<String, Double>>();
 		HashMap<String, Double> discRank = null;
@@ -1042,34 +1170,8 @@ class CloudDbManager implements RecommenderDbService {
 		}
 		return userDiscriminatorRank;
 	}
-	
-	/**Returns all tag for all event in a hashmap. (eventid - tagList)*/
-	public HashMap<Integer, List<String>> getAllEventsTagV2() throws SQLException{
-		HashMap<Integer, List<String>> eventTag = new HashMap<Integer, List<String>>();
-		List<String> tagArray = new ArrayList<String>();
-		PreparedStatement getEventTagStatement = null;
-		ResultSet eventTagResults = null;		
-		try {			
-			String queryStr = "SELECT EventId,tagJson FROM EventTags";		
-			getEventTagStatement = conn.prepareStatement(queryStr);
-			eventTagResults = getEventTagStatement.executeQuery();		
-			while (eventTagResults.next()) {
-				tagArray = parseTagJson(eventTagResults.getString("tagJson"));	// MEG KELL CSINÁLNI A PARSOLÁST !
-				Integer eventId = eventTagResults.getInt("EventId");
-				eventTag.put(eventId, tagArray);
-			}
-		} finally {
-			if (eventTagResults != null)  {
-				eventTagResults.close();
-			}
-			if (getEventTagStatement != null) {
-				getEventTagStatement.close();
-			}
-		}	
-		return eventTag;		
-	}
 
-	/**Returns all tag for legit events from long date converted into integer date*/
+	/*Returns all tag for legit events from long date converted into integer date*/
 	public HashMap<Integer, List<String>> getEventsTagFromDateV2(long fromDate) throws SQLException{
 		HashMap<Integer, List<String>> eventTag = new HashMap<Integer, List<String>>();
 		List<String> tagArray = new ArrayList<String>();
@@ -1077,7 +1179,7 @@ class CloudDbManager implements RecommenderDbService {
 		Integer date = getIntegerDate(fromDate);
 		ResultSet eventTagResults = null;		
 		try {			
-			String queryStr = "SELECT EventId,tagJson FROM EventTags WHERE (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND EventTags.EventId=EventId LIMIT 1)  ";		
+			String queryStr = "SELECT EventId,tagJson FROM EventTags WHERE (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND EventTags.EventId=EventId LIMIT 1)";		
 			getEventTagStatement = conn.prepareStatement(queryStr);
 			getEventTagStatement.setInt(1, date);
 			eventTagResults = getEventTagStatement.executeQuery();		
@@ -1093,11 +1195,130 @@ class CloudDbManager implements RecommenderDbService {
 			if (getEventTagStatement != null) {
 				getEventTagStatement.close();
 			}
-		}	
+		}
 		return eventTag;		
 	}
 	
-	/**Insert a line into eventlog
+	/*Return all events tag from EventTag table.*/
+	public HashMap<Integer, List<String>> getAllEventsTag(){
+		HashMap<Integer, List<String>> eventTag = new HashMap<Integer, List<String>>();
+		List<String> tagArray = new ArrayList<String>();
+		PreparedStatement getEventTagStatement = null;
+		ResultSet eventTagResults = null;
+		String queryStr = "SELECT EventId,tagJson FROM EventTags WHERE 1";		
+		try {
+			getEventTagStatement = conn.prepareStatement(queryStr);
+			eventTagResults = getEventTagStatement.executeQuery();
+			while (eventTagResults.next()) {
+				tagArray = parseTagJson(eventTagResults.getString("tagJson"));	// MEG KELL CSINÁLNI A PARSOLÁST !
+				Integer eventId = eventTagResults.getInt("EventId");
+				eventTag.put(eventId, tagArray);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (eventTagResults != null)  {
+				try {
+					eventTagResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (getEventTagStatement != null) {
+				try {
+					getEventTagStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return eventTag;
+	}
+	
+	/*Update Event Tags in EventsTag table. Works with more event.*/
+	public void uploadEventsTag(HashMap<Integer, List<String>> eventTags){
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Timestamp ts = new Timestamp(utc);
+		HashMap<Integer, List<String>> allEventsTag = getAllEventsTag();
+		HashMap<Integer, List<String>> newEventTags = new HashMap<Integer, List<String>>();
+		PreparedStatement Statement = null;
+		String insertQuery = "INSERT INTO EventTags (tagJson, createdAt, updatedAt, EventId) VALUES (?,?,?,?)";
+		String updateQuery = "UPDATE EventTags SET tagJson =?, updatedAt=? WHERE EventId=?";
+		//-----------------UPDATE----------------------
+		try {
+			for(Entry<Integer, List<String>>entry: eventTags.entrySet()){
+				Integer EventId = entry.getKey();
+				List<String> newTags = entry.getValue();
+				if(allEventsTag.containsKey(EventId)){ //already has this event in tag table
+					List<String> oldTags = allEventsTag.get(EventId);
+					for(int i=0; i<oldTags.size(); i++){
+						String oneTag = oldTags.get(i);
+						newTags.add(oneTag);
+					}
+					newEventTags.put(EventId, newTags);
+				}
+			}
+			Statement = conn.prepareStatement(updateQuery);
+			for(Entry<Integer,List<String>>entry2: newEventTags.entrySet()){
+				Integer EventId = entry2.getKey();
+				List<String> eventTag = entry2.getValue();
+				String json = createJson(eventTag);
+				Statement.setString(1, json);
+				Statement.setTimestamp(2, ts);
+				Statement.setInt(3, EventId);
+				Statement.addBatch();
+			}
+			int[] num = Statement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (Statement != null) {
+				try {
+					Statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		//-------------------INSERT---------------------
+		try {
+			Statement = conn.prepareStatement(insertQuery);
+			for(Entry<Integer, List<String>>entry: eventTags.entrySet()){
+				Integer EventId = entry.getKey();
+				List<String> tags = entry.getValue();
+				if(!allEventsTag.containsKey(EventId)){
+					String json = createJson(tags);
+					Statement.setString(1, json);
+					Statement.setTimestamp(2, ts);
+					Statement.setTimestamp(3, ts);
+					Statement.setInt(4, EventId);
+					Statement.addBatch();
+				}
+			}
+			int[] num = Statement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (Statement != null) {
+				try {
+					Statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}		
+	}
+	
+	/*Insert a line into eventlog
 	 * - user click
 	 * - user event checks
 	 * - user logins*/
@@ -1121,7 +1342,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Insert new log line into RecommendationLogs*/
+	/*Insert new log line into RecommendationLogs*/
 	public void insertRecommendationLog(String comment, Integer UserID){
 		Date local = new Date();
 		DateTimeZone zone = DateTimeZone.getDefault();
@@ -1151,7 +1372,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**NOT USED. USE 3rd VERSION! Insert newly calculated rank values for user event pairs
+	/*NOT USED. USE 3rd VERSION! Insert newly calculated rank values for user event pairs
 	 * - Rank values should be descending order.
 	 * - Delete old rank values before upload new ones*/
 	public void updateRecPV2(int UserId, LinkedHashMap<Integer, Double> EventRanks){
@@ -1209,7 +1430,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Delete, Update, Insert events rank value into UserEventRecommendations table*/
+	/*Delete, Update, Insert events rank value into UserEventRecommendations table*/
 	public void updateRecPV3(int UserId, LinkedHashMap<Integer, Double> newEventRanks){
 		Date local = new Date();
 		DateTimeZone zone = DateTimeZone.getDefault();
@@ -1313,7 +1534,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**JUST - Delete, Insert events rank value into UserEventRecommendations table*/
+	/*JUST - Delete, Insert events rank value into UserEventRecommendations table*/
 	public void insertRecPV4(int UserId, LinkedHashMap<Integer, Double> newEventRanks){
 		Date local = new Date();
 		DateTimeZone zone = DateTimeZone.getDefault();
@@ -1391,7 +1612,7 @@ class CloudDbManager implements RecommenderDbService {
 		}	
 	}
 	
-	/**Insert into NewUserEventChache table the newly calculated first step data. Create shouldChache flag too.*/
+	/*Insert into NewUserEventChache table the newly calculated first step data. Create shouldChache flag too.*/
 	public void updateNewUserEventCaches(List<Rec> zeroUserRanks) throws SQLException{
 		Date local = new Date();
 		DateTimeZone zone = DateTimeZone.getDefault();
@@ -1500,7 +1721,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Update caching flag for GetEventsResponseCaches table*/
+	/*Update caching flag for GetEventsResponseCaches table*/
 	public void setShouldCache(List<Integer>UserIds){
 		PreparedStatement setStatement = null;
 		Date local = new Date();
@@ -1532,7 +1753,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Returns one users recommendation data. hashmap(eventid - double_rank_value)*/
+	/*Returns one users recommendation data. hashmap(eventid - double_rank_value)*/
 	public HashMap<Integer, Double> getRecPUser (int UserId){
 		HashMap<Integer, Double> rankValues = new HashMap<Integer, Double>();
 		PreparedStatement getRecStatement = null;
@@ -1569,14 +1790,14 @@ class CloudDbManager implements RecommenderDbService {
 		return rankValues;	
 	}
 	
-	/**Returns FirstStep ZERO user eventid and rank values*/
+	/*Returns FirstStep ZERO user eventid and rank values*/
 	public HashMap<Integer, Double> getZeroUserRanks(){
 		HashMap<Integer, Double> rankValues = new HashMap<Integer, Double>();
 		PreparedStatement getRecStatement = null;
 		ResultSet resultSet = null;
-		String insertQuery = "SELECT rank, EventId FROM NewUserEventCaches WHERE 1";
+		String getQuery = "SELECT rank, EventId FROM NewUserEventCaches WHERE 1";
 		try {
-			getRecStatement = conn.prepareStatement(insertQuery);
+			getRecStatement = conn.prepareStatement(getQuery);
 			resultSet = getRecStatement.executeQuery();
 			while(resultSet.next()){
 				rankValues.put(resultSet.getInt("EventId"), resultSet.getDouble("rank"));
@@ -1605,7 +1826,7 @@ class CloudDbManager implements RecommenderDbService {
 		return rankValues;	
 	}
 	
-	/**Returns the number of users*/
+	/*Returns the number of users*/
 	public int getAllUserNumberV2() throws SQLException{
 		PreparedStatement getUserStatement = null;
 		ResultSet userResults = null;
@@ -1628,7 +1849,7 @@ class CloudDbManager implements RecommenderDbService {
 		return count;
 	}
 	
-	/**Returns all userid and facebookid in hasmap*/
+	/*Returns all userid and facebookid in hasmap*/
 	public HashMap<Integer, Long> getAllFaceAndUserIdV2() throws SQLException{
 		HashMap<Integer,Long> lhm = new HashMap<Integer,Long>();	
 		PreparedStatement getUserStatement = null;
@@ -1653,7 +1874,7 @@ class CloudDbManager implements RecommenderDbService {
 		return lhm;		
 	}
 	
-	/**Return all users ID in a list*/	// for Rec. accuracy getUserIdArrayFromTestUser
+	/*Return all users ID in a list*/	// for Rec. accuracy getUserIdArrayFromTestUser
 	public List<Integer> getUserIdArray() throws SQLException{
 		PreparedStatement statement = null;
 		ResultSet eventResults = null;
@@ -1676,7 +1897,7 @@ class CloudDbManager implements RecommenderDbService {
 		return l;	
 	}
 	
-	/**Returns FacebookId for UserId - Returns 0 if sth. goes wrong*/
+	/*Returns FacebookId for UserId - Returns 0 if sth. goes wrong*/
 	public long getFbUserIDforUserIDV2(int userId) throws SQLException {
 		long ret = 0;
 		PreparedStatement statement = null;
@@ -1699,7 +1920,7 @@ class CloudDbManager implements RecommenderDbService {
 		return ret;
 	}
 	
-	/**Returns facebookid for one user. Uses userid*/
+	/*Returns facebookid for one user. Uses userid*/
 	public int getUserIdforFacebookUserId(Long facebookUserId) throws SQLException {
 		int ret = 0;
 		PreparedStatement statement = null;
@@ -1722,7 +1943,7 @@ class CloudDbManager implements RecommenderDbService {
 		return ret;
 	}
 	
-	/**Returns all user last visit on site from Users table*/
+	/*Returns all user last visit on site from Users table*/
 	public HashMap<Integer, Date> getAllUserLastVisit() throws SQLException{
 		PreparedStatement statement = null;
 		ResultSet results = null;
@@ -1747,7 +1968,7 @@ class CloudDbManager implements RecommenderDbService {
 		return allUserLastVisit;
 	}
 	
-	/**Returns all event ranks for one user in hashmap. use userid*/
+	/*Returns all event ranks for one user in hashmap. use userid*/
 	public HashMap<Integer,Double> getEventIdArrayForXYUserV2(int UserId) throws SQLException{
 		PreparedStatement statement = null;
 		ResultSet eventResults = null;
@@ -1773,7 +1994,7 @@ class CloudDbManager implements RecommenderDbService {
 		return hm;	
 	}
 	
-	/**Returns true for userId if have in the UserEventRecommendations any rows (:= has rec)*/
+	/*Returns true for userId if have in the UserEventRecommendations any rows (:= has rec)*/
 	public boolean hasRecV2(int userId) throws SQLException{
 		boolean ret = false;
 		PreparedStatement selectStatement = null;
@@ -1800,7 +2021,7 @@ class CloudDbManager implements RecommenderDbService {
 		return ret;
 	}
 	
-	/**Returns users age; if the age is negative age is 0*/
+	/*Returns users age; if the age is negative age is 0*/
 	public Integer getUserAge(int UserId) throws SQLException{
 		PreparedStatement getBirthDateStatement = null;
 		ResultSet bdateResults = null;
@@ -1839,7 +2060,7 @@ class CloudDbManager implements RecommenderDbService {
 		return age;	
 	}
 	
-	/**Returns all like for one user in a Like list. (userid - List<Like>)*/
+	/*Returns all like for one user in a Like list. (userid - List<Like>)*/
 	public List<Like> getAllLikeForUserId(int UserId) throws SQLException{
 		List<Like> likes = new ArrayList<Like>();
 		PreparedStatement selectStatement = null;
@@ -1879,7 +2100,7 @@ class CloudDbManager implements RecommenderDbService {
 		return likes;
 	}
 
-	/**Returns all likes for facebook user; convert fbuserid to userid, !use the other! function to get likes*/
+	/*Returns all likes for facebook user; convert fbuserid to userid, !use the other! function to get likes*/
 	public List<Like> getAllLikeForFbUserIdV2(long facebookUserId) throws SQLException{
 		List<Like> likes = new ArrayList<Like>();
 		PreparedStatement selectStatement = null;
@@ -1920,7 +2141,7 @@ class CloudDbManager implements RecommenderDbService {
 		return likes;
 	}
 	
-	/**Returns all our facebook like id from LikeImdbTags tabl. USe MEtadataFromthirdparty class*/
+	/*Returns all our facebook like id from LikeImdbTags tabl. USe MEtadataFromthirdparty class*/
 	public HashMap<Long, MetadataFromThirdParty> getInfoFromImdbTags() throws SQLException{
 		HashMap<Long, MetadataFromThirdParty> likeTagHm = new HashMap<Long, MetadataFromThirdParty>();
 		PreparedStatement selectStatement = null;
@@ -1951,7 +2172,7 @@ class CloudDbManager implements RecommenderDbService {
 		return likeTagHm;
 	}
 	
-	/**Returns all our facebook like id from LikeLastfmTags table use Metadatafromthirdparty class*/
+	/*Returns all our facebook like id from LikeLastfmTags table use Metadatafromthirdparty class*/
 	public HashMap<Long, MetadataFromThirdParty> getInfoFromLastfmTags() throws SQLException{
 		HashMap<Long, MetadataFromThirdParty> likeTagHm = new HashMap<Long, MetadataFromThirdParty>();
 		PreparedStatement selectStatement = null;
@@ -1982,7 +2203,7 @@ class CloudDbManager implements RecommenderDbService {
 		return likeTagHm;
 	}
 	
-	/**Upload facebook music like tags into Lastfm table. Use Metadatafromthirdparty class*/
+	/*Upload facebook music like tags into Lastfm table. Use Metadatafromthirdparty class*/
 	public void uploadInfoToLastfmTags(HashMap<Long, MetadataFromThirdParty> allNewLikeTagHm){
 		PreparedStatement uploadStatement = null;
 		Date local = new Date();
@@ -2018,7 +2239,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 
-	/**Upload facebook music like tags into IMDB table*/
+	/*Upload facebook music like tags into IMDB table*/
 	public void uploadInfoToImdbTags(HashMap<Long, MetadataFromThirdParty> allNewLikeTagHm){
 		PreparedStatement uploadStatement = null;
 		Date local = new Date();
@@ -2054,7 +2275,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Update FacebookPlaceTags table, to save place categories discriminator types
+	/*Update FacebookPlaceTags table, to save place categories discriminator types
 	 * and the number of categorized event based on this and other category*/
 	public void updateFacebookPlaceTagTable(HashMap<Long, FacebookPlaceTag> newTagDiscNum, HashMap<Long, FacebookPlaceTag> oldTagDiscNum){
 		PreparedStatement statement = null;
@@ -2120,7 +2341,7 @@ class CloudDbManager implements RecommenderDbService {
 		}
 	}
 	
-	/**Returns all Facebook place category from this table*/
+	/*Returns all Facebook place category from this table*/
 	public HashMap<Long, FacebookPlaceTag> getFacebookPlaceTagTable(){
 		HashMap<Long, FacebookPlaceTag> tagDiscriminatorNumber = new HashMap<Long, FacebookPlaceTag>();
 		PreparedStatement selectStatement = null;
@@ -2169,7 +2390,7 @@ class CloudDbManager implements RecommenderDbService {
 		return tagDiscriminatorNumber;
 	}
 	
-	/**Return timestamp date in integer*/
+	/*Return timestamp date in integer*/
 	protected Integer getIntegerDate(long timestamp) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(timestamp);
@@ -2180,7 +2401,7 @@ class CloudDbManager implements RecommenderDbService {
 		return date;
 	}
 	
-	/**tagJson*/
+	/*tagJson*/
 	protected List<String> parseTagJson(String jsonLine) {
 		List<String> tagList = new ArrayList<String>();
 		JSONParser parser=new JSONParser();
@@ -2199,7 +2420,7 @@ class CloudDbManager implements RecommenderDbService {
 		return tagList;
 	}
 
-	/**Returns the created json object string*/
+	/*Returns the created json object string*/
 	protected String createJson(List<String> tagArray){
 		JSONObject obj = new JSONObject();
 		JSONArray list = new JSONArray();
@@ -2209,5 +2430,66 @@ class CloudDbManager implements RecommenderDbService {
 		obj.put("tags", list);
 		String jsonString = obj.toString();
 		return jsonString;
+	}
+
+	
+	public void debugFacebookEventsTable(){
+		List<Integer> allFacebookEvent = getAllFacebookEventFunspotterId();
+		PreparedStatement statement = null;
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Timestamp ts = new Timestamp(utc);
+		String updateQuery = "UPDATE Events SET isOk = ?, isIn = ?, discriminator = ?, updatedAt = ? WHERE id = ?";
+		try {
+			statement = conn.prepareStatement(updateQuery);
+			for(int i=0; i<allFacebookEvent.size(); i++){
+				Integer funspottrerId = allFacebookEvent.get(i);
+				statement.setInt(1,0);
+				statement.setInt(2,0);
+				statement.setString(3, "simple");
+				statement.setTimestamp(4, ts);
+				statement.setInt(5, funspottrerId);
+				statement.addBatch();
+			}
+			int[] num = statement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public void debugFacebookEventsDELETE(){
+		PreparedStatement statement = null;
+		HashMap<Long, Integer> facebookEventId = getAllFutureFacebookEvents();
+		String deleteQuery = "DELETE FROM UserEventRecommendations WHERE EventId = ?";
+		try {
+			statement = conn.prepareStatement(deleteQuery);
+			for(Entry<Long, Integer>entry: facebookEventId.entrySet()){
+				Integer funspotterId = entry.getValue();
+				statement.setInt(1, funspotterId);
+				statement.addBatch();
+			}
+			int[] num = statement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

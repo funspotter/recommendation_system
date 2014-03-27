@@ -17,6 +17,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.incredibles.reclib.Debug;
 import com.incredibles.reclib.DiscriminatorCategorization;
 import com.incredibles.reclib.RecMaintenance;
 import com.incredibles.reclib.UploadFiltersResultV2;
@@ -151,6 +152,19 @@ public class API extends HttpServlet {
 				};
 				Thread t = new Thread(r);
 				t.start();
+			}else if(request.getParameter("cmd").equals("maintainRecTableForOneUser")){
+				final int UserID = Integer.parseInt(request.getParameter("UserId"));
+				Runnable r = new Runnable(){
+					@Override
+					public void run() {
+						uploadRecommendationInfo("RecMaintainStartForOne",UserID);
+						RecMaintenance maintain = new RecMaintenance();
+						maintain.maintainRecTableForOneUser(UserID);
+						uploadRecommendationInfo("RecMaintainDoneForOne",UserID);
+					}
+				};
+				Thread t = new Thread(r);
+				t.start();
 			}else if(request.getParameter("cmd").equals("startGravity")){
 				Runnable r = new Runnable(){
 					@Override
@@ -172,6 +186,17 @@ public class API extends HttpServlet {
 				};
 				Thread t = new Thread(r);
 				t.start();
+			}else if(request.getParameter("cmd").equals("refreshFirstStepOnce")){
+				Runnable r = new Runnable(){
+					@Override
+					public void run() {
+						uploadRecommendationInfo("RefreshFirstStepOnceStart",null);
+						CalculateFirstStepV2.refreshFirstStep();
+						uploadRecommendationInfo("RefreshFirstStepOnceEnd",null);
+					}
+				};
+				Thread t = new Thread(r);
+				t.start();
 			}else if(request.getParameter("cmd").equals("runSecondStepForAll")){
 				Runnable r = new Runnable(){
 					@Override
@@ -188,7 +213,8 @@ public class API extends HttpServlet {
 			}else if(request.getParameter("cmd").equals("categorizeFacebookEvents")){
 				Runnable r = new Runnable(){
 					@Override
-					public void run() {			
+					public void run() {	
+						uploadRecommendationInfo("automaticCategorizingStart",null);
 						RunFacebookEventCategorization categorization = new RunFacebookEventCategorization();
 						categorization.startAutomaticCategorization();
 					}
@@ -199,7 +225,37 @@ public class API extends HttpServlet {
 				Runnable r = new Runnable(){
 					@Override
 					public void run() {
+						uploadRecommendationInfo("categorizingStart",null);
 						DiscriminatorCategorization.categorizing();
+						uploadRecommendationInfo("categorizingEnd",null);
+					}
+				};
+				Thread t = new Thread(r);
+				t.start();
+			}else if(request.getParameter("cmd").equals("debug")){
+				Runnable r = new Runnable(){
+					@Override
+					public void run() {
+						uploadRecommendationInfo("debugStart",null);
+						//Debug.undoFacebookDiscriminators();
+						RecommenderDbService dbService = null;
+						try {
+							dbService = RecommenderDbServiceCreator.createCloud();
+							dbService.debugFacebookEventsDELETE();
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}finally{
+							if(dbService != null){
+								try {
+									dbService.close();
+								} catch (IOException | SQLException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						}
+						uploadRecommendationInfo("debugDone",null);
 					}
 				};
 				Thread t = new Thread(r);

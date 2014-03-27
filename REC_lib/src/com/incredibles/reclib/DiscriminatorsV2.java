@@ -90,7 +90,10 @@ public class DiscriminatorsV2 extends DiscriminatorAndLikeV2 {
 		
 	/*Ranking by movie genre*/
 	public static Double helpCinemaGenreRanking(HashMap<Integer,List<String>> eventGenre, Double rank, Integer eventId, HashMap <String,Double> allCinemaLikeGenre){
-		List<String> genre = eventGenre.get(eventId);
+		List<String> genre = null;
+		if(eventGenre.containsKey(eventId)){
+			genre = eventGenre.get(eventId);
+		}
 		Double ujrank = null;
 		if(genre != null){		
 			Double regiArany = 0.0;
@@ -270,7 +273,10 @@ public class DiscriminatorsV2 extends DiscriminatorAndLikeV2 {
 	
 	/*Ranking by music genre*/
 	public static Double helpMusicGenreRanking(HashMap<Integer,List<String>> eventGenre, Double rank, Integer eventId, HashMap <String,Double> allMusicLikeGenre){
-		List<String> genre = eventGenre.get(eventId);
+		List<String> genre = null;
+		if(eventGenre.containsKey(eventId)){
+			genre = eventGenre.get(eventId);
+		}
 		Double ujrank = null;
 		if(genre != null){	
 			Double regiArany = 0.0;

@@ -1,6 +1,9 @@
+import java.io.IOException;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,7 +13,25 @@ import java.util.Map.Entry;
 
 
 
+
+
+
+
+
+
+
+
+
+
+import com.incredibles.reclib.Debug;
 import com.incredibles.reclib.DiscriminatorCategorization;
+import com.incredibles.reclib.RecMaintenance;
+import com.incredibles.reclib.UploadFiltersResultV2;
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.FacebookClient.AccessToken;
 
 
 
@@ -81,8 +102,74 @@ public class Main {
 //			e.printStackTrace();
 //		}
 //		
-	
 		
+//		Debug.undoFacebookDiscriminators();
+		
+//		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
+//		String MY_APP_ID = "513927361994826";
+//		AccessToken accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+//		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+//		HashMap<Long, String> onePlaceCategoryList = new HashMap<Long, String>();
+//		DiscriminatorCategorization.getFacebookData(1419754628272841L, onePlaceCategoryList , accessToken);
+		
+//		RecommenderDbService dbService = null;
+//		HashMap<Integer, HashMap<String, Double>> userDiscriminatorRank = null;
+//		try {
+//			dbService = RecommenderDbServiceCreator.createCloud();
+//			userDiscriminatorRank = dbService.getUserDiscriminatorRank(0, false);
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}finally{
+//			if(dbService!=null){
+//				try {
+//					dbService.close();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (SQLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//	
+//		for(Entry<Integer, HashMap<String, Double>>entry: userDiscriminatorRank.entrySet()){
+//			Integer UserId = entry.getKey();
+//			HashMap<String, Double> discriminatorRank = entry.getValue();
+//			double sum = 0.0;
+//			for(Entry<String, Double> entry2: discriminatorRank.entrySet()){
+//				sum = sum + entry2.getValue();
+//			}
+//			if(sum == 0.0){
+//				UploadFiltersResultV2.filterExecute(UserId);
+//			}
+//		}
+		
+//		DiscriminatorCategorization.categorizing();
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			dbService.debugFacebookEventsTable();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(dbService != null){
+				try {
+					dbService.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+
+//		UploadFiltersResultV2.filterExecute(968);
 		
 //		DiscriminatorCategorization categor = new DiscriminatorCategorization();
 //		categor.categorizing();
@@ -90,11 +177,11 @@ public class Main {
 //		Double plusPercent = (double) ((double)(1/12)*100);
 //		DecimalFormat df = new DecimalFormat("##.#");
 //        System.out.print(df.format(plusPercent));
-		double d = 12.34567;
-		double valami = ((double)(15-5)/(double)12)*100;
-		//System.out.println(valami);
-        DecimalFormat df = new DecimalFormat("##.##");
-        System.out.print(df.format(valami));
+//		double d = 12.34567;
+//		double valami = ((double)(15-5)/(double)12)*100;
+//		//System.out.println(valami);
+//        DecimalFormat df = new DecimalFormat("##.##");
+//        System.out.print(df.format(valami));
 		//uploadEventDiscriminators(newEventDiscriminator,null);
 		//insertLogInformation("EventCategorizeEnd +: "+df.format(plusPercent)+"% startUncat: "+sumUncatEventNum);
 		

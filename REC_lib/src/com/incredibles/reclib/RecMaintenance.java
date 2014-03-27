@@ -141,6 +141,28 @@ public class RecMaintenance {
 		return userDiscRanks;
 	}
 	
+	/**Returns discriminator ranks for one user*/
+	public HashMap<Integer, HashMap<String, Double>> getOneUserDiscriminatorRank(int UserID){
+		RecommenderDbService dbService = null;
+		HashMap<Integer, HashMap<String, Double>> userDiscRanks = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			userDiscRanks = dbService.getUserDiscriminatorRank(UserID, true);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return userDiscRanks;
+	}
+	
 	/**Returns ranks for user from Rec table*/
 	public HashMap<Integer, Double> getUserRanks(int UserId){
 		HashMap<Integer, Double> UserRanks = null;
@@ -221,11 +243,15 @@ public class RecMaintenance {
     }
 	
 	/**Upload log for one user*/
-	public static void uploadComment(int UserId){
+	public static void uploadComment(String Comment, Integer UserId){
 		RecommenderDbService dbService2=null;
 		try {
 			dbService2 = RecommenderDbServiceCreator.createCloud();
-			dbService2.insertRecommendationLog("RecMaintain for: "+UserId, UserId);
+			if(UserId==null){
+				dbService2.insertRecommendationLog(Comment, 0);
+			}else{
+				dbService2.insertRecommendationLog(Comment, UserId);
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -244,6 +270,52 @@ public class RecMaintenance {
 	* Update isIn flags in Events table.*/
 	public void maintainRecTable(){
 		HashMap<Integer, HashMap<String, Double>> allUserDiscriminatorRank = getAllUserDiscriminatorRank();
+		List<Integer> notInFlagEvents = getLegitEventsWithNotinFlag();
+		List<Integer> legitEvents = getLegitEventsId();
+		HashMap<Integer, String> eventDiscriminator = getEventsDiscriminatorFromDate(); // tolowercase!!
+		HashMap<Integer, Double> UserRanks = null;
+		HashMap<String,Double> discriminatorRank = null;
+		uploadComment("UserNum: "+allUserDiscriminatorRank.size()+" EventToProcess: "+notInFlagEvents.size(),null);
+		int period = 1;
+		for(Entry<Integer, HashMap<String,Double>>entry: allUserDiscriminatorRank.entrySet()){	// run for every user in the system
+			Integer UserId = entry.getKey();
+			UserRanks = getUserRanks(UserId);
+			if(!notInFlagEvents.isEmpty()){
+				discriminatorRank = entry.getValue();
+				for(int i=0; i<notInFlagEvents.size(); i++){	// legit isIn =0 events	HANDLE NEWLY UPLOADED EVENTS INTO RECTABLE
+					Integer EventId = notInFlagEvents.get(i);
+					if(!UserRanks.containsKey(EventId)){	// handle case if event is / isnt in rec table. 
+						String discriminator = eventDiscriminator.get(EventId).toLowerCase();
+						if(!discriminator.equals("simple")){
+							Double newEventRank = discriminatorRank.get(discriminator)+Math.random()/100;
+							UserRanks.put(EventId, newEventRank);
+						}
+					}
+				}
+			}	
+			Iterator<Map.Entry<Integer,Double>> iter = UserRanks.entrySet().iterator(); // delete old events
+			while (iter.hasNext()) {
+			    Map.Entry<Integer,Double> entry1 = iter.next();
+			    Integer EventId = entry1.getKey();
+			    if(!legitEvents.contains(EventId)){
+			        iter.remove();
+			    }
+			}
+			LinkedHashMap<Integer, Double> rankValues = sortByValue(UserRanks);
+			uploadUserRec(rankValues, UserId);	// upload new rank values for user
+			if(period%40==0){
+				uploadComment("40MoreUserDone",null);
+			}
+			period++;
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Date date = new Date();
+			System.out.println("UserID kész: "+UserId +"HashMapSize:"+rankValues.size()+" time: "+dateFormat.format(date));
+		}
+		setisinFlagEvents(legitEvents);	// set isIn flag for legit events
+	}
+
+	public void maintainRecTableForOneUser(int UserId2){
+		HashMap<Integer, HashMap<String, Double>> allUserDiscriminatorRank = getOneUserDiscriminatorRank(UserId2);
 		List<Integer> notInFlagEvents = getLegitEventsWithNotinFlag();
 		List<Integer> legitEvents = getLegitEventsId();
 		HashMap<Integer, String> eventDiscriminator = getEventsDiscriminatorFromDate(); // tolowercase!!
@@ -275,12 +347,9 @@ public class RecMaintenance {
 			}
 			LinkedHashMap<Integer, Double> rankValues = sortByValue(UserRanks);
 			uploadUserRec(rankValues, UserId);	// upload new rank values for user
-			//uploadComment(UserId);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("UserID kész: "+UserId +"HashMapSize:"+rankValues.size()+" time: "+dateFormat.format(date));
 		}
-		setisinFlagEvents(legitEvents);	// set isIn flag for legit events
 	}
-	
 }

@@ -70,8 +70,17 @@ public interface RecommenderDbService {
 	public HashMap<Integer,String> getEventDiscriminatorFromDateV2(long fromDate) throws SQLException;
 	
 	/**Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
-	public HashMap<Long, Integer> getAllUncategorizedFacebookEvents();
+	public HashMap<Long, Integer> getUncategorizedFacebookEvents();
+	
+	/**Returns all future facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllFutureFacebookEvents();
 		
+	/**Returns ALL facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Long, Integer> getAllFacebookEvents();
+	
+	/**Returns all facebook events funspotter id from EventFromFacebook table in List<Integer>*/
+	public List<Integer> getAllFacebookEventFunspotterId();
+	
 	/**Returns checkin places name for one user. In the list one place can be not just one time*/
 	public List<String> getUserCheckin(Integer UserId);
 	
@@ -88,11 +97,14 @@ public interface RecommenderDbService {
 	 * Does not return with the 0. user disc. ranks*/
 	public HashMap<Integer, HashMap<String, Double>> getUserDiscriminatorRank(int UserId, boolean onlyOneUser);
 	
-	/**Returns all tag for all event in a hashmap. (eventid - tagList)*/
-	public HashMap<Integer, List<String>> getAllEventsTagV2() throws SQLException;
-	
 	/**Returns all tag for legit events from long date converted into integer date*/
 	public HashMap<Integer, List<String>> getEventsTagFromDateV2(long fromDate) throws SQLException;
+	
+	/**Return all events tag from EventsTag table.*/
+	public HashMap<Integer, List<String>> getAllEventsTag();
+	
+	/**Update Event Tags in EventsTag table. Works with more event.*/
+	public void uploadEventsTag(HashMap<Integer, List<String>> eventTags);
 	
 	/**Insert a line into eventlog
 	 * - user click
@@ -174,5 +186,9 @@ public interface RecommenderDbService {
 	
 	/**Returns all Facebook place category from this table*/
 	public HashMap<Long, FacebookPlaceTag> getFacebookPlaceTagTable();
+	
+	public void debugFacebookEventsTable();
+	
+	public void debugFacebookEventsDELETE();
 	
 }

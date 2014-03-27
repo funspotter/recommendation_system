@@ -1,6 +1,9 @@
 package com.incredibles.reclib;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,7 +54,29 @@ public class DiscriminatorCategorization {
 		RecommenderDbService dbService = null;
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
-			FacebookEventId = dbService.getAllUncategorizedFacebookEvents();
+			FacebookEventId = dbService.getUncategorizedFacebookEvents();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return FacebookEventId;
+	}
+	
+	/**Returns all facebook events facebook and funspotter id*/
+	public static HashMap<Long, Integer> getAllFacebookEventsIds(){
+		HashMap<Long, Integer> FacebookEventId = null;
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			FacebookEventId = dbService.getAllFacebookEvents();
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -215,10 +240,33 @@ public class DiscriminatorCategorization {
 				System.out.println("NoEventInfo");
 			}
 		}catch(FacebookOAuthException e){
-			System.out.println("ShouldGetNewToken");
+//			System.out.println("ShouldGetNewToken");
 			categoryString = "ShouldGetNewToken";			
 		}
 		return categoryString;
+	}
+	
+	/**Returns all events tag to watch witch events was categorized already.*/
+	public static HashMap<Integer, List<String>> getAllEventsTag(){
+		HashMap<Integer, List<String>> allEventsTag = null;
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			allEventsTag = dbService.getAllEventsTag();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(dbService != null){
+				try {
+					dbService.close();
+				} catch (IOException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return allEventsTag;
 	}
 	
 	/**Upload the newly categorized events discriminator into database
@@ -282,14 +330,113 @@ public class DiscriminatorCategorization {
 			}
 		}
 	}
+	
+	public static void faszom(){
+		HashMap<Long, String> onePlaceCategoryList = new HashMap<Long, String>();
+		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
+		String MY_APP_ID = "513927361994826";
+		AccessToken accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+		int i=0;
+		while(true){
+			try {
+				Thread.sleep(60000);
+//				System.out.println("lefut "+i);
+				i++;
+				String categoryName = getFacebookData(18490L, onePlaceCategoryList, accessToken);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}
 		
+	}
+	
+	public static void writeToFile(HashMap<Long, String> onePlaceCategoryList, String discriminator, String categoryName, Long FacebookId){
+		BufferedWriter writer = null;
+        try {
+            //create a temporary file
+            File logFile = new File("firsttry");
+
+            // This will output the full path where the file will be written to...
+//            System.out.println(logFile.getCanonicalPath());
+            String listCategory = new String();
+            for(Entry<Long, String>entry: onePlaceCategoryList.entrySet()){
+            	listCategory=listCategory+", "+entry.getValue();
+            }
+            writer = new BufferedWriter(new FileWriter(logFile, true));
+            String output = "Fb.Id: "+FacebookId+" Fb.placeCategory: "+categoryName+" Discriminator: "+discriminator+" Fb.placeCategory: "+listCategory;
+//            System.out.println(output);
+            writer.write(output);
+            writer.newLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // Close the writer regardless of what happens...
+                writer.close();
+            } catch (Exception e) {
+            }
+        }
+	}
+	
+	public static void writeToFile2(HashMap<Long, FacebookPlaceTag> CategoryListNumbers){
+		BufferedWriter writer = null;
+        try {
+            //create a temporary file
+            File logFile = new File("categoryListNum");
+            writer = new BufferedWriter(new FileWriter(logFile, true));
+            int max = 0;
+            String maxDisc = "semmi";
+            int secondMax = 0;
+            String secondDisc = "semmi";
+
+            // This will output the full path where the file will be written to...
+//            System.out.println(logFile.getCanonicalPath());
+            for(Entry<Long, FacebookPlaceTag>entry: CategoryListNumbers.entrySet()){
+            	max = 0;
+                maxDisc = "semmi";
+                secondMax = 0;
+                secondDisc = "semmi";
+            	Long PlaceId = entry.getKey();
+            	FacebookPlaceTag place = entry.getValue();
+            	String placeName = place.getName();
+            	HashMap<String, Integer> discNum = place.getDiscriminatorNumber();
+            	for(Entry<String, Integer>entry2: discNum.entrySet()){
+            		String disc = entry2.getKey();
+            		Integer num = entry2.getValue();
+            		if(num > max){
+						secondMax = max;
+						max = num;
+						secondDisc = maxDisc;
+						maxDisc = disc;
+					}else if(num > secondMax && num < max){
+						secondMax = num;
+						secondDisc = disc;
+					}
+            	}
+            	String output = placeName+" "+maxDisc+": "+max+"   "+secondDisc+": "+secondMax;
+            	writer.write(output);
+                writer.newLine();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // Close the writer regardless of what happens...
+                writer.close();
+            } catch (Exception e) {
+            }
+        }
+	}
+	
 	/**Try to categorize all the necessary events*/
 	public static void categorizing(){
-		insertLogInformation("EventCategorizeStart");
-		
-		HashMap<Long, Integer> FacebookEventId = getUncategorizedEventsIds();	//ÁTÍRNI CLOUDBMANAGERBEN HOGY NE AZ ÖSSZES FÁCSÉT KÉRJE LE
-		
+		//insertLogInformation("EventCategorizeStart");
+		HashMap<Long, Integer> FacebookEventId = getAllFacebookEventsIds();
 		HashMap<Long, FacebookPlaceTag> CategoryListNumbers = getCategoryListNumbers();
+		 //Later problem, not just facebook events could have tags
+		HashMap<Integer, List<String>> eventsTag = getAllEventsTag();
 		HashMap<Long, FacebookPlaceTag> oldCategoryListNumbers = new HashMap<Long, FacebookPlaceTag>(CategoryListNumbers);
 		HashMap<Long, String> onePlaceCategoryList = new HashMap<Long, String>();
 		HashMap<Integer, String> newEventDiscriminator = new HashMap<Integer, String>();
@@ -340,7 +487,8 @@ public class DiscriminatorCategorization {
 							CategoryListNumbers.put(oneCategoryListId, discriminatorNumbers);
 						}
 					}
-					insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+discriminator);
+			//		insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+discriminator);
+//					writeToFile(onePlaceCategoryList, discriminator, categoryName, FacebookId);
 					newEventDiscriminator.put(FunspotterId, discriminator);
 				}else{
 					noDiscriminator++;
@@ -357,12 +505,16 @@ public class DiscriminatorCategorization {
 		System.out.println("Nem talalt discriminatort/ köveztkezõ ciklus: "+noDiscriminator);
 		System.out.println("Nem kapott vissza facebooktol place category-t: "+noPlaceCategory);
 		
-		// lehet párhuzamosítani
+		
 		insertLogInformation("EventCategorizationUploadDataStart");
+//		writeToFile2(CategoryListNumbers);
 		uploadEventDiscriminators(newEventDiscriminator,null);
 		uploadCategoryListElements(CategoryListNumbers,oldCategoryListNumbers);
 		insertLogInformation("EventCategorizationUploadDataEnd");
 		newEventDiscriminator.clear();
+		
+		accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+		facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
 		
 		HashMap<String, Integer> eventDiscriminatorNumber = new HashMap<String, Integer>();
 		for(Entry<Long, Integer>entry: FacebookEventId.entrySet()){
@@ -371,10 +523,14 @@ public class DiscriminatorCategorization {
 			if(nextSearchCycleEvents.contains(FacebookId)){
 				eventDiscriminatorNumber.clear();
 				String categoryName = getFacebookData(FacebookId, onePlaceCategoryList, accessToken);
-				if(categoryName.equals("ShouldGetNewToken")){
-					accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
-					facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
-					categoryName = getFacebookData(FacebookId, onePlaceCategoryList, accessToken);
+				try{
+					if(categoryName.equals("ShouldGetNewToken")){
+						accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+						facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+						categoryName = getFacebookData(FacebookId, onePlaceCategoryList, accessToken);
+					}
+				}catch(NullPointerException e){
+//					System.out.println("categoryNameWasNull");
 				}
 				for(Entry<Long, String>entry2: onePlaceCategoryList.entrySet()){
 					Long oneCategoryListId = entry2.getKey();
@@ -386,24 +542,44 @@ public class DiscriminatorCategorization {
 				}
 				int max = 0;
 				String maxDisc = null;
+				int secondMax = 0;
+				String secondMaxDisc = null;
 				for(Entry<String, Integer>entry1: eventDiscriminatorNumber.entrySet()){
 					Integer number = entry1.getValue();
 					String discriminator = entry1.getKey();
 					if(number > max){
+						secondMax = max;
 						max = number;
+						secondMaxDisc = maxDisc;
 						maxDisc = discriminator;
+					}else if(number > secondMax && number < max){
+						secondMax = number;
+						secondMaxDisc = discriminator;
 					}
 				}
 				if(max != 0 && maxDisc!=null){
-					newEventDiscriminator.put(FunspotterId, maxDisc);
-					insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+maxDisc);
+					if(secondMax != 0){
+						if(((double)max/(double)secondMax) >= 2.0){
+							newEventDiscriminator.put(FunspotterId, maxDisc);
+						}
+					}else{
+						newEventDiscriminator.put(FunspotterId, maxDisc);
+					}
+					//insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+maxDisc);
 				}else{
 					notCategorizedEvents++;
 				}
 			}
 		}
-		Double plusPercent = ((double)(sumUncatEventNum-notCategorizedEvents)/(double)sumUncatEventNum)*100;
+		//insertLogInformation("PercentageCounting");
+		Double plusPercent = 0.0;
+		if(sumUncatEventNum != 0){
+			plusPercent = ((double)(sumUncatEventNum-notCategorizedEvents)/(double)sumUncatEventNum)*100;
+		}else{
+			plusPercent = 0.0;
+		}
 		DecimalFormat df = new DecimalFormat("##");
+		System.out.println("EventCategorizeEnd +: "+df.format(plusPercent)+"% startUncat: "+sumUncatEventNum);
 		insertLogInformation("EventCategorizationEventUploadStart");
 		uploadEventDiscriminators(newEventDiscriminator,null);
 		insertLogInformation("EventCategorizeEnd +: "+df.format(plusPercent)+"% startUncat: "+sumUncatEventNum);

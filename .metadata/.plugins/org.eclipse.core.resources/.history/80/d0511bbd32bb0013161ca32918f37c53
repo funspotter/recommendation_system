@@ -1,0 +1,45 @@
+package com.incredibles.reclib;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import com.incredibles.storage.RecommenderDbService;
+import com.incredibles.storage.RecommenderDbServiceCreator;
+
+/**Find top 10 facebook events for today; 10-tomorrow; 10- next week;*/
+public class TopTenEventFilter {
+
+	/*lekérni legit fácse eseményeket és a checkin+ like számukat*/
+	
+	public List<Integer> getOneDayEvents(Date date){
+		List<Integer> eventList = new ArrayList<Integer>();
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			eventList = dbService.getLegitEventsOnDate(date);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(dbService!=null){
+				try {
+					dbService.close();
+				} catch (IOException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return eventList;
+	}
+	
+	public HashMap<Integer, Double> setTopTenEventRanks(HashMap<Integer, Double> eventRank, int UserId){
+		
+		return null;
+	}
+	
+}

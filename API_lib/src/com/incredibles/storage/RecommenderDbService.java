@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.google.gson.JsonArray;
+import com.incredibles.data.FacebookPageNumbers;
+import com.incredibles.data.FunspotterEvent;
 import com.incredibles.data.FacebookPlaceTag;
 import com.incredibles.data.Like;
 import com.incredibles.data.LogTableInfoClass;
@@ -39,9 +41,15 @@ public interface RecommenderDbService {
 	 * - uses two Date time interval and convert these into integer dates*/
 	public List<Integer> getLegitEventsIdV2(Date from, Date to);
 	
+	/**Returns legit events happening on the predefined DATE*/
+	public List<Integer> getLegitEventsOnDate(Date date);
+	
 	/**Returns legit events in int List.*/
 	public List<Integer> getLegitEventsIdFromDate(long from);
 	
+	/**Returns all future event but unchecked (isOk =0) events funspotterID*/
+	public List<Integer> getAllFutureUncheckedEventId();
+		
 	/**Returns legit events click number from EventLogs Table*/
 	public HashMap<Integer, Integer> countLegitEventsClick();
 	
@@ -69,8 +77,14 @@ public interface RecommenderDbService {
 	/**Return events discriminator FROM DATE in HM (eventid - discriminator)*/
 	public HashMap<Integer,String> getEventDiscriminatorFromDateV2(long fromDate) throws SQLException;
 	
+	/**Return specified event information in Event object*/
+	public HashMap<Integer, FunspotterEvent> getFutureEventsInformation();
+	
 	/**Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
-	public HashMap<Long, Integer> getUncategorizedFacebookEvents();
+	public HashMap<Long, Integer> getUncategorizedFutureFacebookEvents();
+	
+	/**Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Integer, Long> getCategorizedFutureFacebookEvents();
 	
 	/**Returns all future facebook events (facebook and funspotter) id from facebook*/
 	public HashMap<Long, Integer> getAllFutureFacebookEvents();
@@ -78,8 +92,17 @@ public interface RecommenderDbService {
 	/**Returns ALL facebook events (facebook and funspotter) id from facebook*/
 	public HashMap<Long, Integer> getAllFacebookEvents();
 	
+	/**Returns all facebook events info, need more specified sql query based on time interval.*/
+	public HashMap<Integer, Long> getFacebookEventsPageInformation();
+	
 	/**Returns all facebook events funspotter id from EventFromFacebook table in List<Integer>*/
 	public List<Integer> getAllFacebookEventFunspotterId();
+	
+	/**Returns all PageId from FacebookPages table*/
+	public List<Long> getAllFacebookPageId();
+	
+	/**Update FacebookPages and EventFromFacebook table, with hashmap pageId; pageinfo class*/
+	public void updateFacebookPageInformation(HashMap<Long, FacebookPageNumbers> pageInfos);
 	
 	/**Returns checkin places name for one user. In the list one place can be not just one time*/
 	public List<String> getUserCheckin(Integer UserId);
@@ -125,6 +148,10 @@ public interface RecommenderDbService {
 	
 	/**JUST - Delete, Insert events rank value into UserEventRecommendations table*/
 	public void insertRecPV4(int UserId, LinkedHashMap<Integer, Double> newEventRanks);
+	
+	/**Update specified events for ALL USER.
+	 * This function dont handle if one event is not in the recommendation table with one rank value*/
+	public void updateRecPV5(HashMap<Integer, Double> newEventRanks);
 	
 	/**Insert into NewUserEventChache table the newly calculated first step data. Create shouldChache flag too.*/
 	public void updateNewUserEventCaches(List<Rec> zeroUserRanks) throws SQLException;

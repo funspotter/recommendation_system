@@ -21,17 +21,18 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.incredibles.data.FacebookPageNumbers;
+import com.incredibles.data.FunspotterEvent;
 import com.incredibles.data.Like;
 import com.incredibles.data.LogTableTypes;
 import com.incredibles.data.Rec;
 import com.incredibles.data.MetadataFromThirdParty;
 import com.incredibles.data.FacebookPlaceTag;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
 
 
-/*AMIT MEG KELLENE CSINÁLNI:
- * - com.incredibles.data mappában rendesen megírni az adat osztályokat. pl: Event..
- * - */
+
 
 /**
  * Simple implementation of {@link DbManager} wich download log from CloudDB
@@ -93,8 +94,6 @@ class CloudDbManager implements RecommenderDbService {
 		static final String ALIAS_DAY = "the_day";
 	}
 	
-	
-
 	
 	
 	/**
@@ -239,11 +238,52 @@ class CloudDbManager implements RecommenderDbService {
 		List<Integer> eventList = new ArrayList<Integer>();
 		Integer intDateFrom = getIntegerDate(from.getTime());
 		Integer intDateTo = getIntegerDate(to.getTime());
-		String queryStr = "SELECT id FROM Events WHERE ((isOk=1 OR isOk=2) AND (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND EventDays.day <= ? AND Events.id=EventId LIMIT 1))";
+		/*kula*/
+		String queryStr = "SELECT id FROM Events WHERE ((isOk=1 OR isOk=2) AND (SELECT EventId FROM EventDays WHERE EventDays.day > ? AND EventDays.day < ? AND Events.id=EventId LIMIT 1))";
 		try {
 			getEventStatement = conn.prepareStatement(queryStr);
 			getEventStatement.setInt(1, intDateFrom);
 			getEventStatement.setInt(2, intDateTo);
+			eventResult = getEventStatement.executeQuery();
+			while(eventResult.next()){
+				Integer eventID = eventResult.getInt("id");
+				eventList.add(eventID);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if (eventResult != null)  {
+				try {
+					eventResult.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (getEventStatement != null) {
+				try {
+					getEventStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return eventList;
+	}
+	
+	/*Returns legit events happening on the predefined DATE*/
+	public List<Integer> getLegitEventsOnDate(Date date){
+		PreparedStatement getEventStatement = null;
+		ResultSet eventResult = null;
+		Integer intDate = getIntegerDate(date.getTime());
+		List<Integer> eventList = new ArrayList<Integer>();
+		/*kula*/
+		String queryStr = "SELECT id FROM Events WHERE ((isOk=1 OR isOk=2) AND (SELECT EventId FROM EventDays WHERE EventDays.day = ? AND Events.id=EventId LIMIT 1))";
+		try {
+			getEventStatement = conn.prepareStatement(queryStr);
+			getEventStatement.setInt(1, intDate);
 			eventResult = getEventStatement.executeQuery();
 			while(eventResult.next()){
 				Integer eventID = eventResult.getInt("id");
@@ -280,6 +320,7 @@ class CloudDbManager implements RecommenderDbService {
 		PreparedStatement getEventStatement = null;
 		ResultSet eventResults = null;
 		try {				
+			/*kula*/
 			String queryStr = "SELECT id FROM Events WHERE ((isOk=1 OR isOk=2) AND (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND Events.id = EventId LIMIT 1))";
 			try {
 				getEventStatement = conn.prepareStatement(queryStr);
@@ -322,6 +363,7 @@ class CloudDbManager implements RecommenderDbService {
 		Integer intDate = getIntegerDate(from);		
 		PreparedStatement getEventStatement = null;
 		ResultSet eventResults = null;
+		/*kula*/
 		String queryStr = "SELECT id FROM Events WHERE ((isOk=1 OR isOk=2) AND isIn=0 AND (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND Events.id = EventId LIMIT 1))";
 		try {
 			getEventStatement = conn.prepareStatement(queryStr);
@@ -355,6 +397,49 @@ class CloudDbManager implements RecommenderDbService {
 			}
 		}
 		return eventIdList;
+	}
+	
+	/*Returns all future event but unchecked (isOk =0) events funspotterID*/
+	public List<Integer> getAllFutureUncheckedEventId(){
+		List<Integer> eventIds = new ArrayList<Integer>();
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Timestamp ts = new Timestamp(utc);
+		Integer IntDate = getIntegerDate(utc);
+		PreparedStatement statement = null;
+		ResultSet result = null;
+		String query = "SELECT id FROM Events WHERE isOk=0 AND (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND Events.id=EventId LIMIT 1)";
+		try {
+			statement = conn.prepareStatement(query);
+			statement.setInt(1, IntDate);
+			result = statement.executeQuery();
+			while(result.next()){
+				Integer FunspotterId = result.getInt("id");
+				eventIds.add(FunspotterId);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (result != null)  {
+				try {
+					result.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return eventIds;
 	}
 	
 	/*Returns all events in hashmap with ISIn value.*/
@@ -480,7 +565,8 @@ class CloudDbManager implements RecommenderDbService {
 		List<HashMap<Integer,String>> hashmapList = null;
 		PreparedStatement getEventStatement = null;
 		ResultSet eventResults = null;	
-		try {				
+		try {		
+			/*kula*/
 			String queryStr = "SELECT id,title,description FROM Events WHERE ((isOk=1 OR isOk=2) AND (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND Events.id=EventId LIMIT 1))";
 			getEventStatement = conn.prepareStatement(queryStr);
 			getEventStatement.setInt(1, intDateFrom);
@@ -542,6 +628,7 @@ class CloudDbManager implements RecommenderDbService {
 		PreparedStatement getEventStatement = null;
 		ResultSet eventResults = null;		
 		try {
+			/*kula*/
 			String queryStr = "SELECT id,description FROM Events WHERE ((isOk=1 OR isOk=2) AND (SELECT EventId FROM EventDays WHERE day >= ? AND Events.id=EventId LIMIT 1))";
 			getEventStatement = conn.prepareStatement(queryStr);
 			getEventStatement.setInt(1, date);
@@ -594,6 +681,7 @@ class CloudDbManager implements RecommenderDbService {
 		PreparedStatement getEventStatement = null;
 		ResultSet eventResults = null;		
 		try {
+			/*kula*/
 			String queryStr = "SELECT id,discriminator FROM Events WHERE ((isOk=1 OR isOk=2) AND (SELECT EventId FROM EventDays WHERE day >= ? AND Events.id=EventId LIMIT 1))";
 			getEventStatement = conn.prepareStatement(queryStr);
 			getEventStatement.setInt(1, date);
@@ -614,6 +702,68 @@ class CloudDbManager implements RecommenderDbService {
 		return s;
 	}
 	
+	/*Return specified event information in Event object*/
+	public HashMap<Integer, FunspotterEvent> getFutureEventsInformation(){
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Integer Date = getIntegerDate(utc);
+		HashMap<Integer, FunspotterEvent> eventInfo = new HashMap<Integer, FunspotterEvent>();
+		String query = "SELECT id,title,description,thumbnailUrl,imageUrlsJson,discriminator,origin,isOk,isIn FROM Events WHERE (SELECT EventId FROM EventDays WHERE Events.id = EventId AND day >= ? LIMIT 1)";
+		try {
+			statement = conn.prepareStatement(query);
+			statement.setInt(1, Date);
+			resultSet = statement.executeQuery();
+			while(resultSet.next()){
+				Integer funspotterId = resultSet.getInt("id");
+				String title = resultSet.getString("title");
+				String description = resultSet.getString("description");
+				String discriminator = resultSet.getString("discriminator");
+				String origin = resultSet.getString("origin");
+				String thumbnailUrl = resultSet.getString("thumbnailUrl");
+				String imageUrlsJson = resultSet.getString("imageUrlsJson");
+				Integer isOk = resultSet.getInt("isOk");
+				Integer isIn = resultSet.getInt("isIn");
+				if(!funspotterId.equals(0)){
+					FunspotterEvent event = new FunspotterEvent();
+					event.setFunspotterId(funspotterId);
+					event.setTitle(title);
+					event.setDescription(description);
+					event.setThumbnailUrl(thumbnailUrl);
+					event.setImageUrlsJson(imageUrlsJson);
+					event.setDiscriminator(discriminator);
+					event.setOrigin(origin);
+					event.setIsOk(isOk);
+					event.setIsIn(isIn);
+					eventInfo.put(funspotterId, event);
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (resultSet != null)  {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return eventInfo;
+	}
+	
 	/*Update events discriminator and isOk value, handle the noinfofromfacebook case too*/
 	public void updateEventsDiscriminator(HashMap<Integer, String> categorizedEvents, List<Integer>noInfoFromFacebook){
 		PreparedStatement updateStatement = null;
@@ -628,7 +778,7 @@ class CloudDbManager implements RecommenderDbService {
 				for(Entry<Integer, String>entry: categorizedEvents.entrySet()){
 					Integer funspotterId = entry.getKey();
 					String discriminator  = entry.getValue();
-					updateStatement.setInt(1, 1);
+					updateStatement.setInt(1, 1);	// 5 means categorized with facebook categorizer
 					updateStatement.setTimestamp(2, ts);
 					updateStatement.setString(3, discriminator);
 					updateStatement.setInt(4, funspotterId);
@@ -638,7 +788,7 @@ class CloudDbManager implements RecommenderDbService {
 			if(noInfoFromFacebook!=null){
 				for(int i=0; i<noInfoFromFacebook.size(); i++){
 					Integer funspotterId = noInfoFromFacebook.get(i);
-					updateStatement.setInt(1, 0);
+					updateStatement.setInt(1, 0);	// no info from categorization means: 4
 					updateStatement.setTimestamp(2, ts);
 					updateStatement.setString(3, "simple");
 					updateStatement.setInt(4, funspotterId);
@@ -661,21 +811,71 @@ class CloudDbManager implements RecommenderDbService {
 	}
 	
 	/*Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
-	public HashMap<Long, Integer> getUncategorizedFacebookEvents(){
+	public HashMap<Long, Integer> getUncategorizedFutureFacebookEvents(){
 		HashMap<Long, Integer> FaceAndFunspotterEventId = new HashMap<Long, Integer>();
+		List<Integer> futureUncheckedEvents = getAllFutureUncheckedEventId();
 		PreparedStatement statement= null;
 		ResultSet eventResults = null;
 		try {
 			String queryStr = "SELECT facebookId, EventId from EventFromFacebook WHERE (SELECT id FROM Events WHERE EventFromFacebook.EventId = id AND isOk = 0)";
-		//	String queryStr2 = "SELECT facebookId, EventId from EventFromFacebook WHERE 1";
 			statement = conn.prepareStatement(queryStr);
 			eventResults = statement.executeQuery();
 			while(eventResults.next()){
 				Long FacebookId = eventResults.getLong("facebookId");
 				Integer FunspotterId = eventResults.getInt("EventId");
-				if(FacebookId!=null && !FacebookId.equals(0L)){
-					if(FunspotterId!=null && !FunspotterId.equals(0)){
-						FaceAndFunspotterEventId.put(FacebookId, FunspotterId);
+				if(futureUncheckedEvents.contains(FunspotterId)){	// is this a future event?
+					if(FacebookId!=null && !FacebookId.equals(0L)){
+						if(FunspotterId!=null && !FunspotterId.equals(0)){
+							FaceAndFunspotterEventId.put(FacebookId, FunspotterId);
+						}
+					}
+				}	
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (eventResults != null)  {
+				try {
+					eventResults.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
+		return FaceAndFunspotterEventId;
+	}
+	
+	/*Returns uncategorized facebook events (facebook and funspotter) id from facebook*/
+	public HashMap<Integer, Long> getCategorizedFutureFacebookEvents(){
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		HashMap<Integer, Long> FaceAndFunspotterEventId = new HashMap<Integer, Long>();
+		List<Integer> futureCheckedEvents = getLegitEventsIdFromDate(utc);
+		PreparedStatement statement= null;
+		ResultSet eventResults = null;
+		try {
+			String queryStr = "SELECT facebookId, EventId from EventFromFacebook WHERE (SELECT id FROM Events WHERE EventFromFacebook.EventId = id AND (isOk = 1 OR isOk = 2))";
+			statement = conn.prepareStatement(queryStr);
+			eventResults = statement.executeQuery();
+			while(eventResults.next()){
+				Long FacebookId = eventResults.getLong("facebookId");
+				Integer FunspotterId = eventResults.getInt("EventId");
+				if(futureCheckedEvents.contains(FunspotterId)){	// is this a future event?
+					if(FacebookId!=null && !FacebookId.equals(0L)){
+						if(FunspotterId!=null && !FunspotterId.equals(0)){
+							FaceAndFunspotterEventId.put(FunspotterId,FacebookId);
+						}
 					}
 				}	
 			}
@@ -829,6 +1029,191 @@ class CloudDbManager implements RecommenderDbService {
 		return allFacebookEventFunspotterId;
 	}
 	
+	/*Returns all PageId from FacebookPages table*/
+	public List<Long> getAllFacebookPageId(){
+		List<Long> pageIdArray = new ArrayList<Long>();
+		PreparedStatement statement = null;
+		String query = "SELECT facebookPageId FROM FacebookPages WHERE 1";
+		ResultSet result = null;
+		try {
+			statement = conn.prepareStatement(query);
+			result = statement.executeQuery();
+			while(result.next()){
+				Long FacebookPageId = result.getLong("facebookPageId");
+				pageIdArray.add(FacebookPageId);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (result != null)  {
+				try {
+					result.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return pageIdArray;
+	}
+	
+	/*Returns all facebook events info, need more specified sql query based on time interval.*/
+	public HashMap<Integer, Long> getFacebookEventsPageInformation(){
+		HashMap<Integer, Long> EventsPageInfo = new HashMap<Integer, Long>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		String query = "SELECT EventFromFacebook.EventId, FacebookPages.likeCount, FacebookPages.checkinCount FROM EventFromFacebook INNER JOIN FacebookPages ON (EventFromFacebook.FacebookPageId=FacebookPages.facebookPageID)";
+		try {
+			statement = conn.prepareStatement(query);
+			resultSet = statement.executeQuery();
+			while(resultSet.next()){
+				Integer EventId = resultSet.getInt("EventId");
+				Long likeCount = resultSet.getLong("likeCount");
+				Long checkinCount = resultSet.getLong("checkinCount");
+				Long sumNum = likeCount + checkinCount;
+				EventsPageInfo.put(EventId, sumNum);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (resultSet != null)  {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return EventsPageInfo;
+	}
+	
+	/*Update FacebookPages and EventFromFacebook table, with hashmap<pageId; pageinfo class>*/
+	public void updateFacebookPageInformation(HashMap<Long, FacebookPageNumbers> pageInfos){
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Timestamp ts = new Timestamp(utc);
+		PreparedStatement statement = null;
+		List<Long> allPageId = getAllFacebookPageId();
+		List<Long> updatePageId = new ArrayList<Long>();
+		List<Long> insertPageId = new ArrayList<Long>();
+		for(Entry<Long, FacebookPageNumbers>entry: pageInfos.entrySet()){
+			Long pageId = entry.getKey();
+			if(allPageId.contains(pageId)){
+				updatePageId.add(pageId);
+			}else{
+				insertPageId.add(pageId);
+			}
+		}
+		String updateQuery = "UPDATE FacebookPages SET updatedAt = ?, likeCount = ?, checkinCount = ? WHERE facebookPageId = ?";
+		String insertQuery = "INSERT INTO FacebookPages (createdAt, updatedAt, facebookPageId, likeCount, checkinCount) VALUES (?,?,?,?,?)";
+		String updateEventFromFacebook = "UPDATE EventFromFacebook SET FacebookPageId = ?, updatedAt = ? WHERE EventId = ?";
+		/*Insert new line into FacebookPages*/
+		if(!insertPageId.isEmpty()){
+			try {
+				statement = conn.prepareStatement(insertQuery);
+				for(int i=0; i<insertPageId.size(); i++){
+					Long pageId = insertPageId.get(i);
+					FacebookPageNumbers OnePageInfo = pageInfos.get(pageId);
+					statement.setTimestamp(1, ts);
+					statement.setTimestamp(2, ts);
+					statement.setLong(3, OnePageInfo.getPageId());
+					statement.setLong(4, OnePageInfo.getLikeNumber());
+					statement.setLong(5, OnePageInfo.getCheckinNumberLong());
+					statement.addBatch();
+				}
+				int[] num = statement.executeBatch();
+			}catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}finally {
+				if (statement != null) {
+					try {
+						statement.close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		/*Update old line in FacebookPages*/
+		if(!updatePageId.isEmpty()){
+			try {
+				statement = conn.prepareStatement(updateQuery);
+				for(int i=0; i<updatePageId.size(); i++){
+					Long pageId = updatePageId.get(i);
+					FacebookPageNumbers OnePageInfo = pageInfos.get(pageId);
+					statement.setTimestamp(1, ts);
+					statement.setLong(2, OnePageInfo.getLikeNumber());
+					statement.setLong(3, OnePageInfo.getCheckinNumberLong());
+					statement.setLong(4, pageId);
+					statement.addBatch();
+				}
+				int[] num = statement.executeBatch(); 
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}finally {
+				if (statement != null) {
+					try {
+						statement.close();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		/*Update EventFromFacebook FacebookPageId*/
+		utc = zone.convertLocalToUTC(local.getTime(), false);
+		ts = new Timestamp(utc);
+		try {
+			statement = conn.prepareStatement(updateEventFromFacebook);
+			for(Entry<Long, FacebookPageNumbers>entry: pageInfos.entrySet()){
+				Long pageId = entry.getKey();
+				FacebookPageNumbers OnePageInfo = entry.getValue();
+				Integer FunspotterId = OnePageInfo.getFunspotterEventId();
+				statement.setLong(1, pageId);
+				statement.setTimestamp(2, ts);
+				statement.setInt(3, FunspotterId);
+				statement.addBatch();
+			}
+			int [] num = statement.executeBatch();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/*Returns checkin places name for one user. In the list one place can be not just one time*/
 	public List<String> getUserCheckin(Integer UserId){
 		List<String> checkinData = new ArrayList<String>();
@@ -918,6 +1303,7 @@ class CloudDbManager implements RecommenderDbService {
 	/*Upload isin flag in Events table.*/
 	public void updateIsinFlagForEvents(List<Integer> legitEventsIdFromDate){
 		PreparedStatement updateStatement = null;
+		/*kula*/
 		HashMap<Integer, Boolean> AllEventsWithIsinFlag = getAllEventsWithIsinFlag();
 		Date local = new Date();
 		DateTimeZone zone = DateTimeZone.getDefault();
@@ -1610,6 +1996,42 @@ class CloudDbManager implements RecommenderDbService {
 				}
 			}
 		}	
+	}
+	
+	/*Update specified events for ALL USER.
+	 * This function dont handle if one event is not in the recommendation table with one rank value*/
+	public void updateRecPV5(HashMap<Integer, Double> newEventRanks){
+		Date local = new Date();
+		DateTimeZone zone = DateTimeZone.getDefault();
+		long utc = zone.convertLocalToUTC(local.getTime(), false);
+		Timestamp ts = new Timestamp(utc);
+		PreparedStatement statement = null;
+		String query = "UPDATE UserEventRecommendations SET rank=?, updatedAt=? WHERE EventId=?";
+		if(!newEventRanks.isEmpty()){
+			try {
+				statement = conn.prepareStatement(query);
+				for(Entry<Integer, Double>entry: newEventRanks.entrySet()){
+					Integer FunspotterEventId = entry.getKey();
+					Double rank = entry.getValue();
+					statement.setDouble(1, rank);
+					statement.setTimestamp(2, ts);
+					statement.setInt(3, FunspotterEventId);
+					statement.addBatch();
+				}
+				int[] num = statement.executeBatch();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}finally {
+				if (statement != null) {
+					try {
+						statement.close();
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 	
 	/*Insert into NewUserEventChache table the newly calculated first step data. Create shouldChache flag too.*/
@@ -2432,9 +2854,44 @@ class CloudDbManager implements RecommenderDbService {
 		return jsonString;
 	}
 
+	public List<Integer> getWrongEvents(){
+		List<Integer> eventIds = new ArrayList<Integer>();
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		String query = "SELECT id FROM Events WHERE updatedAt > '2014-04-02 16:42:07'";
+		try {
+			statement = conn.prepareStatement(query);
+			resultSet = statement.executeQuery();
+			while(resultSet.next()){
+				Integer FunspotterId = resultSet.getInt("id");
+				eventIds.add(FunspotterId);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (resultSet != null) {
+				try {
+					resultSet.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}	
+		}
+		return eventIds;
+	}
 	
 	public void debugFacebookEventsTable(){
-		List<Integer> allFacebookEvent = getAllFacebookEventFunspotterId();
+		List<Integer> allFacebookEvent = getWrongEvents();
 		PreparedStatement statement = null;
 		Date local = new Date();
 		DateTimeZone zone = DateTimeZone.getDefault();
@@ -2469,12 +2926,12 @@ class CloudDbManager implements RecommenderDbService {
 
 	public void debugFacebookEventsDELETE(){
 		PreparedStatement statement = null;
-		HashMap<Long, Integer> facebookEventId = getAllFutureFacebookEvents();
+		List<Integer> facebookEvents = getAllFacebookEventFunspotterId();
 		String deleteQuery = "DELETE FROM UserEventRecommendations WHERE EventId = ?";
 		try {
 			statement = conn.prepareStatement(deleteQuery);
-			for(Entry<Long, Integer>entry: facebookEventId.entrySet()){
-				Integer funspotterId = entry.getValue();
+			for(int i=0; i<facebookEvents.size(); i++){
+				Integer funspotterId = facebookEvents.get(i);
 				statement.setInt(1, funspotterId);
 				statement.addBatch();
 			}

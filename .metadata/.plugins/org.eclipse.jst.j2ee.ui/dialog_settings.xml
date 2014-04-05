@@ -3,11 +3,10 @@
 	<item value="true" key="J2EE_EXPORT_OVERWRITE"/>
 	<item value="false" key="J2EE_EXPORT_SOURCE"/>
 	<list key="J2EE_EXPORT_JST_WEB">
+		<item value="C:\Users\Dacide\Desktop\funspotter API\20140402\APITEST2.war"/>
+		<item value="C:\Users\Dacide\Desktop\funspotter API\20140327\APITEST2.war"/>
+		<item value="C:\Users\Dacide\Desktop\funspotter API\20140326\APITEST2.war"/>
+		<item value="C:\Users\Dacide\Desktop\funspotter API\20140325\APITEST2.war"/>
 		<item value="C:\Users\Dacide\Desktop\funspotter API\20140318\APITEST2.war"/>
-		<item value="C:\Users\Dacide\Desktop\funspotter API\20140317\APITEST2.war"/>
-		<item value="C:\Users\Dacide\Desktop\funspotter API\20140317\APITEST.war"/>
-		<item value="C:\Users\Dacide\Desktop\funspotter API\20140315\APITEST2.war"/>
-		<item value="C:\Users\Dacide\Desktop\funspotter API\APITEST2.war"/>
-		<item value="C:\Users\Dacide\Desktop\APITEST2.war"/>
 	</list>
 </section>

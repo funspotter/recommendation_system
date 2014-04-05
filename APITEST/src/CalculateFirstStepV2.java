@@ -16,6 +16,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.incredibles.data.Rec;
+import com.incredibles.reclib.TopTenEventFilter;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
 
@@ -56,6 +57,8 @@ public class CalculateFirstStepV2 {
 					}
 				}
 			}
+			TopTenEventFilter filter = new TopTenEventFilter();
+			eventRank = filter.setTopTenEventRanks(eventRank);
 			LinkedHashMap<Integer, Double> sortedMapDesc = sortByValue(eventRank);
 			List<Rec> eventFirstStepRank = new ArrayList<Rec>();					
 			for (Entry<Integer, Double> entry : sortedMapDesc.entrySet()) {

@@ -1,6 +1,6 @@
 package com.incredibles.data;
 
-public class ToJsonEvent extends Event  {
+public class ToJsonEvent extends FunspotterEvent  {
 	
 	/**
 	 * 
@@ -14,22 +14,22 @@ public class ToJsonEvent extends Event  {
 	protected float x;
 	protected float y;
 	
-	public ToJsonEvent(String name, Type type, long go, long end, String location, String category) {
-		super(name, type);
-		this.go = go;
-		this.end = end;
-		this.location = location;
-		this.category = category;
-		this.showList = null;
-	}
+//	public ToJsonEvent(String name, Type type, long go, long end, String location, String category) {
+//		super(name, type);
+//		this.go = go;
+//		this.end = end;
+//		this.location = location;
+//		this.category = category;
+////		this.showList = null;
+//	}
 
-	public ToJsonEvent(String name, Type type) {
-		super(name, type);
-	}
-
-	public ToJsonEvent() {
-		super(Type.MOVIE);
-	}
+//	public ToJsonEvent(String name, Type type) {
+//		super(name, type);
+//	}
+//
+//	public ToJsonEvent() {
+//		super(Type.MOVIE);
+//	}
 
 	
 

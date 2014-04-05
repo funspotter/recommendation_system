@@ -26,6 +26,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.incredibles.data.FacebookPlaceTag;
+import com.incredibles.data.FunspotterEvent;
+import com.incredibles.data.FacebookPageNumbers;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
 import com.restfb.DefaultFacebookClient;
@@ -36,9 +38,15 @@ import com.restfb.exception.FacebookException;
 import com.restfb.exception.FacebookOAuthException;
 import com.restfb.json.JsonException;
 import com.restfb.types.Event;
+import com.restfb.types.Page;
 import com.restfb.types.Place;
 
 public class DiscriminatorCategorization {
+	
+	public class StringLong{
+		Long Number;
+		String Words;
+	}
 	
 	static String cinemaList = "Cinema";
 	static String exhibitionList = "Museum/Art Gallery";
@@ -48,13 +56,39 @@ public class DiscriminatorCategorization {
 	static String travelList = "Transport, Tours/Sightseeing, Spas/Beauty/Personal Care, Airport, Hotel, Landmark";
 	static String partyList = "Club";
 	
+	static String categorizingStringV2 = "Concert Venue, Club";
+	
+	static final Long MIN_NUMBER = 750L;
+	
 	/**Returns uncategorized events facebook and funspotter id*/
-	public static HashMap<Long, Integer> getUncategorizedEventsIds(){
+	public static HashMap<Long, Integer> getFutureUncategorizedEventsIds(){
 		HashMap<Long, Integer> FacebookEventId = null;
 		RecommenderDbService dbService = null;
 		try {
 			dbService = RecommenderDbServiceCreator.createCloud();
-			FacebookEventId = dbService.getUncategorizedFacebookEvents();
+			FacebookEventId = dbService.getUncategorizedFutureFacebookEvents();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}finally {
+			if (dbService != null) {
+				try {
+					dbService.close();
+				} catch (SQLException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return FacebookEventId;
+	}
+
+	/**Returns uncategorized events facebook and funspotter id*/
+	public static HashMap<Long, Integer> getFutureFacebookEventsIds(){
+		HashMap<Long, Integer> FacebookEventId = null;
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			FacebookEventId = dbService.getAllFutureFacebookEvents();
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -107,6 +141,14 @@ public class DiscriminatorCategorization {
 		}else if(travelList.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Travel";
 		}else if(partyList.toLowerCase().contains(FacebookCategory.toLowerCase())){
+			return "Party";
+		}else{
+			return null;
+		}
+	}
+	
+	public static String easyCategorizizingV2(String FacebookCategory){
+		if(categorizingStringV2.toLowerCase().contains(FacebookCategory.toLowerCase())){
 			return "Party";
 		}else{
 			return null;
@@ -208,7 +250,7 @@ public class DiscriminatorCategorization {
 			try{
 				event = facebookClient.fetchObject(EventFacebookId, Event.class, Parameter.with("metadata", 1));
 				try{
-					place  = facebookClient.fetchObject(event.getVenue().getId(), Place.class, Parameter.with("metadata", 1));
+					place = facebookClient.fetchObject(event.getVenue().getId(), Place.class, Parameter.with("metadata", 1));
 					try{
 						JSONObject category = null;
 						JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
@@ -244,6 +286,119 @@ public class DiscriminatorCategorization {
 			categoryString = "ShouldGetNewToken";			
 		}
 		return categoryString;
+	}
+	
+	/**Returns facebook events places main category, and page checkin like numbers in FacebookPageNumbers object*/
+	public StringLong getFacebookDataV2(Long FacebookId, Integer FunspotterId, AccessToken accessToken, HashMap<Long, FacebookPageNumbers> pageData){
+		Event event = null;
+		Page page = null;
+		Place place = null;
+		String categoryString = null;
+		StringLong data = new StringLong();
+		data.Words = null;
+		try{
+			FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+			String EventFacebookId = FacebookId.toString();
+			try{
+				event = facebookClient.fetchObject(EventFacebookId, Event.class, Parameter.with("metadata", 1));
+				try{
+					page  = facebookClient.fetchObject(event.getVenue().getId(), Page.class);
+					place = facebookClient.fetchObject(event.getVenue().getId(), Place.class, Parameter.with("metadata", 1));
+					System.out.println(place.toString());
+					try{
+						long likes = 0;
+						int checkins = 0;
+						try{
+							likes = page.getLikes();
+							checkins = page.getCheckins();
+							try{
+								Long pageId = Long.parseLong(page.getId());
+								FacebookPageNumbers newData = new FacebookPageNumbers();
+								newData.setFacebookEventId(FacebookId);
+								newData.setChekinNumber(checkins);
+								newData.setFunspotterEventId(FunspotterId);
+								newData.setPageId(pageId);
+								newData.setLikeNumber(likes);
+								pageData.put(pageId, newData);
+								JSONObject category = null;
+								JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
+								JSONArray tomb = (JSONArray) valami.get("data");
+								System.out.println(tomb);
+								try{
+									JSONObject valami2 = (JSONObject) tomb.get(0);
+									JSONObject valami3 = (JSONObject) valami2.get("to");
+									JSONArray tomb2 = (JSONArray) valami3.get("data");
+									category = (JSONObject) tomb2.get(0);
+									categoryString = category.get("category").toString();
+									data.Number = pageId;
+									data.Words = categoryString;
+								}catch(IndexOutOfBoundsException e){
+									System.out.println("IndexOutOfBounds");
+								}
+							}catch(NullPointerException | NumberFormatException e){
+								e.printStackTrace();
+							}
+						}catch(NullPointerException e){
+							e.printStackTrace();
+						}
+					}catch(NullPointerException | IOException | ParseException e){
+						System.out.println("problemWithJson");
+					}
+				}catch(FacebookException | NullPointerException e){
+					System.out.println("NoPlaceInfo");
+				}
+			}catch(FacebookException e){
+				System.out.println("NoEventInfo");
+			}
+		}catch(FacebookOAuthException e){
+			System.out.println("ShouldHaveNewToken");
+		}
+		return data;
+	}
+	
+	/**Event has the minimal properties, not null title, thumbnail, description*/
+	public static boolean eventContentOk(HashMap<Integer, FunspotterEvent> eventInfo, Integer FunspotterId){
+		boolean ok = false;
+		if(eventInfo.containsKey(FunspotterId)){
+			FunspotterEvent oneEvent = eventInfo.get(FunspotterId);
+			try{
+				String title = oneEvent.getTitle();
+				String thumbnailUrl = oneEvent.getThumbnailUrl();
+				String description = oneEvent.getDescription();
+				if(title != null && thumbnailUrl != null && description != null){
+					if(thumbnailUrl.length()>15 && description.length()>10){
+						ok = true;
+					}
+				}
+			}catch(NullPointerException e){
+				return false;
+			}
+			
+		}
+		return ok;
+	}
+	
+	/**Returns future events information, id; discriminator; thumbnail; ... see FacebookEvent class*/
+	public static HashMap<Integer, FunspotterEvent> getFutureEventInfo(){
+		HashMap<Integer, FunspotterEvent> eventInfo = new HashMap<Integer, FunspotterEvent>();
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			eventInfo = dbService.getFutureEventsInformation();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(dbService != null){
+				try {
+					dbService.close();
+				} catch (IOException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
+		return eventInfo;
 	}
 	
 	/**Returns all events tag to watch witch events was categorized already.*/
@@ -290,6 +445,27 @@ public class DiscriminatorCategorization {
 		}
 	}
 	
+	/**Update FacebookPages and EventFromFAcebook table with place  like and checkin number and pageid*/
+	public static void uploadFacebookPageInformation(HashMap<Long, FacebookPageNumbers> pagInfos){
+		RecommenderDbService dbService = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			dbService.updateFacebookPageInformation(pagInfos);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(dbService != null){
+				try {
+					dbService.close();
+				} catch (IOException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	/**Upload all of the categoryList elements into table with the new discriminator numbers*/
 	public static void uploadCategoryListElements(HashMap<Long, FacebookPlaceTag> CategoryListElements, HashMap<Long, FacebookPlaceTag> oldCategoryListElements){
 		RecommenderDbService dbService = null;
@@ -311,7 +487,7 @@ public class DiscriminatorCategorization {
 		}
 	}
 	
-	/**Insert one log information to check the categorized evenst percent*/
+	/**Insert one log information*/
 	public static void insertLogInformation(String comment){
 		RecommenderDbService dbService2=null;
 		try {
@@ -432,10 +608,11 @@ public class DiscriminatorCategorization {
 	
 	/**Try to categorize all the necessary events*/
 	public static void categorizing(){
-		//insertLogInformation("EventCategorizeStart");
-		HashMap<Long, Integer> FacebookEventId = getAllFacebookEventsIds();
+//		insertLogInformation("EventCategorizeStart");
+		HashMap<Long, Integer> FacebookEventId = getFutureUncategorizedEventsIds();
 		HashMap<Long, FacebookPlaceTag> CategoryListNumbers = getCategoryListNumbers();
-		 //Later problem, not just facebook events could have tags
+		HashMap<Integer, FunspotterEvent> eventInfo = getFutureEventInfo();
+		//Later problem, not just facebook events could have tags
 		HashMap<Integer, List<String>> eventsTag = getAllEventsTag();
 		HashMap<Long, FacebookPlaceTag> oldCategoryListNumbers = new HashMap<Long, FacebookPlaceTag>(CategoryListNumbers);
 		HashMap<Long, String> onePlaceCategoryList = new HashMap<Long, String>();
@@ -487,12 +664,16 @@ public class DiscriminatorCategorization {
 							CategoryListNumbers.put(oneCategoryListId, discriminatorNumbers);
 						}
 					}
-			//		insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+discriminator);
+//					insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+discriminator);
 //					writeToFile(onePlaceCategoryList, discriminator, categoryName, FacebookId);
-					newEventDiscriminator.put(FunspotterId, discriminator);
+					if(eventContentOk(eventInfo, FunspotterId)){
+						newEventDiscriminator.put(FunspotterId, discriminator);
+					}
 				}else{
 					noDiscriminator++;
-					nextSearchCycleEvents.add(FacebookId);
+					if(eventContentOk(eventInfo, FunspotterId)){
+						nextSearchCycleEvents.add(FacebookId);
+					}
 				}
 			}else{
 				noInfoFromFacebook.add(FunspotterId);
@@ -565,13 +746,13 @@ public class DiscriminatorCategorization {
 					}else{
 						newEventDiscriminator.put(FunspotterId, maxDisc);
 					}
-					//insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+maxDisc);
+//					insertLogInformation("EventCategorized: "+FunspotterId+" disc: "+maxDisc);
 				}else{
 					notCategorizedEvents++;
 				}
 			}
 		}
-		//insertLogInformation("PercentageCounting");
+		insertLogInformation("PercentageCounting");
 		Double plusPercent = 0.0;
 		if(sumUncatEventNum != 0){
 			plusPercent = ((double)(sumUncatEventNum-notCategorizedEvents)/(double)sumUncatEventNum)*100;
@@ -581,8 +762,65 @@ public class DiscriminatorCategorization {
 		DecimalFormat df = new DecimalFormat("##");
 		System.out.println("EventCategorizeEnd +: "+df.format(plusPercent)+"% startUncat: "+sumUncatEventNum);
 		insertLogInformation("EventCategorizationEventUploadStart");
-		uploadEventDiscriminators(newEventDiscriminator,null);
+		uploadEventDiscriminators(newEventDiscriminator,noInfoFromFacebook);
 		insertLogInformation("EventCategorizeEnd +: "+df.format(plusPercent)+"% startUncat: "+sumUncatEventNum);
+	}
+
+	/**2nd version categorization based on main facebook place category: Concert Venue and Club*/
+	public void categorizingV2(){
+		insertLogInformation("EventCategorizeStart");
+		HashMap<Long, Integer> FacebookEventId = getFutureFacebookEventsIds();
+		HashMap<Integer, FunspotterEvent> eventInfo = getFutureEventInfo();
+		HashMap<Integer, String> newEventDiscriminator = new HashMap<Integer, String>();
+		HashMap<Long, FacebookPageNumbers> pageData = new HashMap<Long, FacebookPageNumbers>();	// contains facebook page info
+		/*Facebook Token*/
+		String MY_APP_SECRET = "add4434d3f3f754d29d567d59f285be5";
+		String MY_APP_ID = "513927361994826";
+		AccessToken accessToken = new DefaultFacebookClient().obtainAppAccessToken(MY_APP_ID, MY_APP_SECRET);
+		FacebookClient facebookClient = new DefaultFacebookClient(accessToken.getAccessToken());
+		Long pageId = 0L;
+		/*--------------*/
+		for(Entry<Long, Integer>entry: FacebookEventId.entrySet()){
+			Long FacebookId = entry.getKey();
+			Integer FunspotterId = entry.getValue();
+			StringLong data = getFacebookDataV2(FacebookId, FunspotterId, accessToken, pageData);
+			if(data.Words != null){
+				pageId = data.Number;
+				Long sumNumber = pageData.get(pageId).getSumLikeAndCheckin();
+				String easyCategory = easyCategorizizingV2(data.Words);
+				if(easyCategory != null){
+					if(sumNumber > MIN_NUMBER){
+						if(eventContentOk(eventInfo, FunspotterId)){
+							newEventDiscriminator.put(FunspotterId, "Party");
+						}
+					}
+				}else{
+					if(eventInfo.containsKey(FunspotterId)){
+						FunspotterEvent oneEvent = eventInfo.get(FunspotterId);
+						String Discriminator = "simple";
+						try{
+							Discriminator = oneEvent.getDiscriminator();
+						}catch(NullPointerException e){
+							e.printStackTrace();
+						}
+						if(!Discriminator.equals("Party")){
+							if(pageData.containsKey(FunspotterId)){
+								pageData.remove(FunspotterId);
+							}
+						}
+					}
+				}
+			}else{
+				if(pageData.containsKey(FunspotterId)){
+					pageData.remove(FunspotterId);
+				}
+			}
+		}
+		insertLogInformation("CategorizeDiscriminatorUpload");
+		uploadEventDiscriminators(newEventDiscriminator, null);
+		insertLogInformation("CategorizePageDataUpload");
+		uploadFacebookPageInformation(pageData);
+		insertLogInformation("EventCategorizeEnd"+" Done: "+newEventDiscriminator.size()+"From: "+FacebookEventId.size());
 	}
 	
 	private static JSONObject readJsonFromUrl(String url) throws IOException, ParseException {

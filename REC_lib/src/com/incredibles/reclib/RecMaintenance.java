@@ -227,6 +227,43 @@ public class RecMaintenance {
 		}
 	}
 	
+	/**Returns all users ID from Users table*/
+	public List<Integer> getAllUserId(){
+		RecommenderDbService dbService = null;
+		List<Integer> userIdArray = null;
+		try {
+			dbService = RecommenderDbServiceCreator.createCloud();
+			userIdArray = dbService.getUserIdArray();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(dbService != null){
+				try {
+					dbService.close();
+				} catch (IOException | SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return userIdArray;
+	}
+	
+	/**At least one user hasnt got discriminator vector, should reload the discriminator hashmap*/
+	public boolean shouldMaintainDiscriminatorVectors(HashMap<Integer, HashMap<String, Double>> allUserDiscriminatorRank){
+		boolean flag = false;
+		List<Integer> userIdArray = getAllUserId();
+		for(int i=0; i< userIdArray.size(); i++){
+			Integer UserId = userIdArray.get(i);
+			if(!allUserDiscriminatorRank.containsKey(UserId)){
+				UploadFiltersResultV2.filterExecute(UserId);
+				flag= true;
+			}
+		}
+		return flag;
+	}
+	
 	/**Nomen est omen. Needed because of the new database structure*/
 	public static LinkedHashMap<Integer, Double> sortByValue(Map<Integer, Double> map) {
         List<Map.Entry<Integer, Double>> list = new LinkedList<Map.Entry<Integer, Double>>(map.entrySet());
@@ -270,6 +307,10 @@ public class RecMaintenance {
 	* Update isIn flags in Events table.*/
 	public void maintainRecTable(){
 		HashMap<Integer, HashMap<String, Double>> allUserDiscriminatorRank = getAllUserDiscriminatorRank();
+		boolean shouldReload = shouldMaintainDiscriminatorVectors(allUserDiscriminatorRank);
+		if(shouldReload == true){
+			allUserDiscriminatorRank = getAllUserDiscriminatorRank();
+		}
 		List<Integer> notInFlagEvents = getLegitEventsWithNotinFlag();
 		List<Integer> legitEvents = getLegitEventsId();
 		HashMap<Integer, String> eventDiscriminator = getEventsDiscriminatorFromDate(); // tolowercase!!
@@ -311,19 +352,25 @@ public class RecMaintenance {
 			Date date = new Date();
 			System.out.println("UserID kész: "+UserId +"HashMapSize:"+rankValues.size()+" time: "+dateFormat.format(date));
 		}
+		TopTenEventFilter top = new TopTenEventFilter();
+		top.setTopEventRanksForAllUser(); // set top facebook events rank value
 		setisinFlagEvents(legitEvents);	// set isIn flag for legit events
 	}
 
+	/**Maintain for only ONE USER + SET TOP FacebookEvents + set disc vector if missing*/
 	public void maintainRecTableForOneUser(int UserId2){
 		HashMap<Integer, HashMap<String, Double>> allUserDiscriminatorRank = getOneUserDiscriminatorRank(UserId2);
+		HashMap<Integer, Double> UserRanks = getUserRanks(UserId2);
+		if(allUserDiscriminatorRank.isEmpty()){
+			UploadFiltersResultV2.filterExecute(UserId2);
+			allUserDiscriminatorRank = getOneUserDiscriminatorRank(UserId2);
+		}
 		List<Integer> notInFlagEvents = getLegitEventsWithNotinFlag();
 		List<Integer> legitEvents = getLegitEventsId();
 		HashMap<Integer, String> eventDiscriminator = getEventsDiscriminatorFromDate(); // tolowercase!!
-		HashMap<Integer, Double> UserRanks = null;
 		HashMap<String,Double> discriminatorRank = null;
 		for(Entry<Integer, HashMap<String,Double>>entry: allUserDiscriminatorRank.entrySet()){	// run for every user in the system
 			Integer UserId = entry.getKey();
-			UserRanks = getUserRanks(UserId);
 			if(!notInFlagEvents.isEmpty()){
 				discriminatorRank = entry.getValue();
 				for(int i=0; i<notInFlagEvents.size(); i++){	// legit isIn =0 events	HANDLE NEWLY UPLOADED EVENTS INTO RECTABLE
@@ -350,6 +397,8 @@ public class RecMaintenance {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("UserID kész: "+UserId +"HashMapSize:"+rankValues.size()+" time: "+dateFormat.format(date));
+			TopTenEventFilter one = new TopTenEventFilter();
+			one.setTopTenEventRanks(rankValues);
 		}
 	}
 }

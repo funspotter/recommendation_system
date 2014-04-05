@@ -53,6 +53,6 @@ private final ScheduledExecutorService scheduler = Executors.newScheduledThreadP
 				}
 			}
 		};
-		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 12, TimeUnit.HOURS);
+		final ScheduledFuture<?> beeperHandle = scheduler.scheduleAtFixedRate(beeper, 0, 26, TimeUnit.HOURS);
 	}
 }

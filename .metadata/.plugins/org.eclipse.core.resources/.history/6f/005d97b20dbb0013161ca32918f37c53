@@ -1,0 +1,15 @@
+package com.incredibles.reclib;
+
+import java.util.HashMap;
+
+/**Finds top 3 events from the important discriminators and sets for the highest rank*/
+public class TopTenEventFilter {
+
+	/*lekérni legit fácse eseményeket és a checkin+ like számukat*/
+	
+	public HashMap<Integer, Double> setTopTenEventRanks(HashMap<Integer, Double> eventRank, int UserId){
+		
+		return null;
+	}
+	
+}

@@ -23,9 +23,11 @@ import java.util.Map.Entry;
 
 
 
+
 import com.incredibles.reclib.Debug;
 import com.incredibles.reclib.DiscriminatorCategorization;
 import com.incredibles.reclib.RecMaintenance;
+import com.incredibles.reclib.TopTenEventFilter;
 import com.incredibles.reclib.UploadFiltersResultV2;
 import com.incredibles.storage.RecommenderDbService;
 import com.incredibles.storage.RecommenderDbServiceCreator;
@@ -146,27 +148,56 @@ public class Main {
 //			}
 //		}
 		
-//		DiscriminatorCategorization.categorizing();
-		RecommenderDbService dbService = null;
-		try {
-			dbService = RecommenderDbServiceCreator.createCloud();
-			dbService.debugFacebookEventsTable();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}finally{
-			if(dbService != null){
-				try {
-					dbService.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
+//		DiscriminatorCategorization valami = new DiscriminatorCategorization();
+//		valami.categorizingV2();
+//		HashMap<Integer, Double> ranks = new HashMap<Integer, Double>();
+//		RecommenderDbService dbService = null;
+//		try {
+//			dbService = RecommenderDbServiceCreator.createCloud();
+//			ranks = dbService.getRecPUser(389);
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}finally{
+//			if(dbService != null){
+//				try {
+//					dbService.close();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (SQLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//		TopTenEventFilter valami = new TopTenEventFilter();
+//		ranks = valami.setTopTenEventRanks(ranks);
+//		for(Entry<Integer, Double>entry: ranks.entrySet()){
+//			System.out.println(entry.getKey()+"  "+entry.getValue());
+//		}
+//		LinkedHashMap<Integer, Double> valami2 = new LinkedHashMap<Integer, Double>(ranks);
+//		dbService = null;
+//		try {
+//			dbService = RecommenderDbServiceCreator.createCloud();
+//			dbService.updateRecPV3(389, valami2);
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}finally{
+//			if(dbService != null){
+//				try {
+//					dbService.close();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (SQLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+		
 		
 
 //		UploadFiltersResultV2.filterExecute(968);
@@ -278,8 +309,8 @@ public class Main {
 //		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 //		Date date = new Date();
 //		System.out.println(" time: "+dateFormat.format(date));
-//		RecMaintenance maintain = new RecMaintenance();
-//		maintain.maintainRecTable();
+		RecMaintenance maintain = new RecMaintenance();
+		maintain.maintainRecTable();
 		
 //		RecMaintenance maintain = new RecMaintenance();
 //		maintain.maintainRecTable();

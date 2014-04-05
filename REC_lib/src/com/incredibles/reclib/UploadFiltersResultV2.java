@@ -31,6 +31,9 @@ public class UploadFiltersResultV2 {
 //		FilterForCorvinus two = new FilterForCorvinus();
 //		eventRankValues2 = two.setEventsRank(fbId);
 		
+		TopTenEventFilter three = new TopTenEventFilter();
+		eventRankValues1 = three.setTopTenEventRanks(eventRankValues1);
+		
 		SumEventRanks = sortByValueAndMakeThousandElement(hashmapPutTogether(eventRankValues1,eventRankValues2));
 		RecommenderDbService dbService = null;
 		try {

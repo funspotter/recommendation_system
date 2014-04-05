@@ -226,7 +226,8 @@ public class API extends HttpServlet {
 					@Override
 					public void run() {
 						uploadRecommendationInfo("categorizingStart",null);
-						DiscriminatorCategorization.categorizing();
+						DiscriminatorCategorization categ = new DiscriminatorCategorization();
+						categ.categorizingV2();
 						uploadRecommendationInfo("categorizingEnd",null);
 					}
 				};

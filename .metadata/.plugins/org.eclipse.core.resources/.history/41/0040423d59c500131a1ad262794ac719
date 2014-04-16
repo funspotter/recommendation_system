@@ -32,7 +32,6 @@ public class API extends HttpServlet {
 
 	private final Gson gson;
 	
-	
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */

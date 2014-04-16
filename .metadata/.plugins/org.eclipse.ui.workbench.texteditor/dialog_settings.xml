@@ -13,16 +13,16 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="updateRecPV3" key="selection"/>
+		<item value="updateEventsDiscriminator" key="selection"/>
 		<list key="findhistory">
-			<item value="updateRecPV3"/>
-			<item value="getCategorizedFutureFacebookEvents"/>
-			<item value="getUncate"/>
+			<item value="updateEventsDiscriminator"/>
+			<item value="updateRecPV5"/>
+			<item value="maintainRecTable"/>
+			<item value="getUserDiscriminatorRank"/>
+			<item value="Recp"/>
+			<item value="Rec"/>
 			<item value="timestamp"/>
-			<item value="unchecked"/>
-			<item value="getAllFacebook"/>
-			<item value="AS"/>
-			<item value="FacebookPage"/>
+			<item value="getLegitEventsOnDate"/>
 		</list>
 		<list key="replacehistory">
 			<item value="*"/>

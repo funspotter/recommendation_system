@@ -33,17 +33,13 @@
 <fullyQualifiedTypeName name="com.incredibles.reclib.CheckinFilter"/>
 <fullyQualifiedTypeName name="java.util.Collections"/>
 <fullyQualifiedTypeName name="com.incredibles.data.MetadataFromThirdParty"/>
-<fullyQualifiedTypeName name="com.incredibles.reclib.UploadFiltersResultV2"/>
 <fullyQualifiedTypeName name="CalculateFirstStepV2"/>
 <fullyQualifiedTypeName name="com.incredibles.data.Event"/>
 <fullyQualifiedTypeName name="com.restfb.types.Event"/>
-<fullyQualifiedTypeName name="com.incredibles.data.FunspotterEvent"/>
 <fullyQualifiedTypeName name="com.restfb.exception.FacebookOAuthException"/>
 <fullyQualifiedTypeName name="com.restfb.exception.FacebookException"/>
 <fullyQualifiedTypeName name="com.restfb.types.Page"/>
-<fullyQualifiedTypeName name="java.lang.NullPointerException"/>
 <fullyQualifiedTypeName name="java.util.Map.Entry"/>
-<fullyQualifiedTypeName name="com.incredibles.data.FacebookPageNumbers"/>
 <fullyQualifiedTypeName name="com.mysql.jdbc.PreparedStatement"/>
 <fullyQualifiedTypeName name="com.sun.xml.internal.ws.api.ha.StickyFeature"/>
 <fullyQualifiedTypeName name="java.lang.Long"/>
@@ -54,10 +50,14 @@
 <fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
-<fullyQualifiedTypeName name="java.sql.PreparedStatement"/>
 <fullyQualifiedTypeName name="java.sql.ResultSet"/>
+<fullyQualifiedTypeName name="java.util.Calendar"/>
+<fullyQualifiedTypeName name="com.incredibles.data.FacebookPageNumbers"/>
+<fullyQualifiedTypeName name="com.incredibles.data.FunspotterEvent"/>
+<fullyQualifiedTypeName name="java.lang.NullPointerException"/>
+<fullyQualifiedTypeName name="java.sql.PreparedStatement"/>
 <fullyQualifiedTypeName name="com.incredibles.storage.RecommenderDbService"/>
 <fullyQualifiedTypeName name="com.incredibles.storage.RecommenderDbServiceCreator"/>
-<fullyQualifiedTypeName name="java.util.Calendar"/>
+<fullyQualifiedTypeName name="com.incredibles.reclib.UploadFiltersResultV2"/>
 <fullyQualifiedTypeName name="com.incredibles.reclib.TopTenEventFilter"/>
 </qualifiedTypeNameHistroy>

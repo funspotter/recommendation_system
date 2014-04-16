@@ -771,27 +771,24 @@ class CloudDbManager implements RecommenderDbService {
 		DateTimeZone zone = DateTimeZone.getDefault();
 		long utc = zone.convertLocalToUTC(local.getTime(), false);
 		Timestamp ts = new Timestamp(utc);
-		List<Integer> discriminiedEvents = getLegitEventsOnDate(local);
 		String queryStrUpdate = "UPDATE Events SET isOk = ?, updatedAt = ?, discriminator = ? WHERE id = ?";
 		try {
 			updateStatement = conn.prepareStatement(queryStrUpdate);
 			if(categorizedEvents != null){
 				for(Entry<Integer, String>entry: categorizedEvents.entrySet()){
 					Integer funspotterId = entry.getKey();
-					if(!discriminiedEvents.contains(funspotterId)){
-						String discriminator  = entry.getValue();
-						updateStatement.setInt(1, 1);
-						updateStatement.setTimestamp(2, ts);
-						updateStatement.setString(3, discriminator);
-						updateStatement.setInt(4, funspotterId);
-						updateStatement.addBatch();
-					}
+					String discriminator  = entry.getValue();
+					updateStatement.setInt(1, 1);	// 5 means categorized with facebook categorizer
+					updateStatement.setTimestamp(2, ts);
+					updateStatement.setString(3, discriminator);
+					updateStatement.setInt(4, funspotterId);
+					updateStatement.addBatch();
 				}
 			}
 			if(noInfoFromFacebook!=null){
 				for(int i=0; i<noInfoFromFacebook.size(); i++){
 					Integer funspotterId = noInfoFromFacebook.get(i);
-					updateStatement.setInt(1, 0);
+					updateStatement.setInt(1, 0);	// no info from categorization means: 4
 					updateStatement.setTimestamp(2, ts);
 					updateStatement.setString(3, "simple");
 					updateStatement.setInt(4, funspotterId);

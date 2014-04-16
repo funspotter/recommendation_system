@@ -778,14 +778,12 @@ class CloudDbManager implements RecommenderDbService {
 			if(categorizedEvents != null){
 				for(Entry<Integer, String>entry: categorizedEvents.entrySet()){
 					Integer funspotterId = entry.getKey();
-					if(!discriminiedEvents.contains(funspotterId)){
-						String discriminator  = entry.getValue();
-						updateStatement.setInt(1, 1);
-						updateStatement.setTimestamp(2, ts);
-						updateStatement.setString(3, discriminator);
-						updateStatement.setInt(4, funspotterId);
-						updateStatement.addBatch();
-					}
+					String discriminator  = entry.getValue();
+					updateStatement.setInt(1, 1);
+					updateStatement.setTimestamp(2, ts);
+					updateStatement.setString(3, discriminator);
+					updateStatement.setInt(4, funspotterId);
+					updateStatement.addBatch();
 				}
 			}
 			if(noInfoFromFacebook!=null){

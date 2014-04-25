@@ -58,6 +58,8 @@ public class DiscriminatorCategorization {
 	
 	static String categorizingStringV2 = "Concert Venue, Club";
 	
+	
+	
 	static final Long MIN_NUMBER = 750L;
 	
 	/**Returns uncategorized events facebook and funspotter id*/
@@ -290,6 +292,9 @@ public class DiscriminatorCategorization {
 	
 	/**Returns facebook events places main category, and page checkin like numbers in FacebookPageNumbers object*/
 	public StringLong getFacebookDataV2(Long FacebookId, Integer FunspotterId, AccessToken accessToken, HashMap<Long, FacebookPageNumbers> pageData){
+		List<Long> notWellcomedPlaces = new ArrayList<Long>();
+		notWellcomedPlaces.add(335553359801907L);	// place id we dont want to see categorized
+		
 		Event event = null;
 		Page page = null;
 		Place place = null;
@@ -313,27 +318,29 @@ public class DiscriminatorCategorization {
 							checkins = page.getCheckins();
 							try{
 								Long pageId = Long.parseLong(page.getId());
-								FacebookPageNumbers newData = new FacebookPageNumbers();
-								newData.setFacebookEventId(FacebookId);
-								newData.setChekinNumber(checkins);
-								newData.setFunspotterEventId(FunspotterId);
-								newData.setPageId(pageId);
-								newData.setLikeNumber(likes);
-								pageData.put(pageId, newData);
-								JSONObject category = null;
-								JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
-								JSONArray tomb = (JSONArray) valami.get("data");
-								System.out.println(tomb);
-								try{
-									JSONObject valami2 = (JSONObject) tomb.get(0);
-									JSONObject valami3 = (JSONObject) valami2.get("to");
-									JSONArray tomb2 = (JSONArray) valami3.get("data");
-									category = (JSONObject) tomb2.get(0);
-									categoryString = category.get("category").toString();
-									data.Number = pageId;
-									data.Words = categoryString;
-								}catch(IndexOutOfBoundsException e){
-									System.out.println("IndexOutOfBounds");
+								if(!notWellcomedPlaces.contains(pageId)){
+									FacebookPageNumbers newData = new FacebookPageNumbers();
+									newData.setFacebookEventId(FacebookId);
+									newData.setChekinNumber(checkins);
+									newData.setFunspotterEventId(FunspotterId);
+									newData.setPageId(pageId);
+									newData.setLikeNumber(likes);
+									pageData.put(pageId, newData);
+									JSONObject category = null;
+									JSONObject valami = readJsonFromUrl(place.getMetadata().getConnections().getTagged().toString());
+									JSONArray tomb = (JSONArray) valami.get("data");
+									System.out.println(tomb);
+									try{
+										JSONObject valami2 = (JSONObject) tomb.get(0);
+										JSONObject valami3 = (JSONObject) valami2.get("to");
+										JSONArray tomb2 = (JSONArray) valami3.get("data");
+										category = (JSONObject) tomb2.get(0);
+										categoryString = category.get("category").toString();
+										data.Number = pageId;
+										data.Words = categoryString;
+									}catch(IndexOutOfBoundsException e){
+										System.out.println("IndexOutOfBounds");
+									}
 								}
 							}catch(NullPointerException | NumberFormatException e){
 								e.printStackTrace();
@@ -608,7 +615,7 @@ public class DiscriminatorCategorization {
 	
 	/**Try to categorize all the necessary events*/
 	public static void categorizing(){
-//		insertLogInformation("EventCategorizeStart");
+		insertLogInformation("EventCategorizeStart");
 		HashMap<Long, Integer> FacebookEventId = getFutureUncategorizedEventsIds();
 		HashMap<Long, FacebookPlaceTag> CategoryListNumbers = getCategoryListNumbers();
 		HashMap<Integer, FunspotterEvent> eventInfo = getFutureEventInfo();
@@ -768,7 +775,7 @@ public class DiscriminatorCategorization {
 
 	/**2nd version categorization based on main facebook place category: Concert Venue and Club*/
 	public void categorizingV2(){
-		insertLogInformation("EventCategorizeStart");
+//		insertLogInformation("EventCategorizeStart");
 		HashMap<Long, Integer> FacebookEventId = getFutureFacebookEventsIds();
 		HashMap<Integer, FunspotterEvent> eventInfo = getFutureEventInfo();
 		HashMap<Integer, String> newEventDiscriminator = new HashMap<Integer, String>();

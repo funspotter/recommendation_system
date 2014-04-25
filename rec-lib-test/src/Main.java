@@ -148,8 +148,8 @@ public class Main {
 //			}
 //		}
 		
-//		DiscriminatorCategorization valami = new DiscriminatorCategorization();
-//		valami.categorizingV2();
+		DiscriminatorCategorization valami = new DiscriminatorCategorization();
+		valami.categorizingV2();
 //		HashMap<Integer, Double> ranks = new HashMap<Integer, Double>();
 //		RecommenderDbService dbService = null;
 //		try {
@@ -309,9 +309,9 @@ public class Main {
 //		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 //		Date date = new Date();
 //		System.out.println(" time: "+dateFormat.format(date));
-		RecMaintenance maintain = new RecMaintenance();
-		maintain.maintainRecTable();
-		
+//		RecMaintenance maintain = new RecMaintenance();
+//		maintain.maintainRecTable();
+//		
 //		RecMaintenance maintain = new RecMaintenance();
 //		maintain.maintainRecTable();
 		

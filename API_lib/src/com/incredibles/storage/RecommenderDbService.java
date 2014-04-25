@@ -44,6 +44,9 @@ public interface RecommenderDbService {
 	/**Returns legit events happening on the predefined DATE*/
 	public List<Integer> getLegitEventsOnDate(Date date);
 	
+	/**Returns legit isOk=1;2;3 events happening on the predefined DATE*/
+	public List<Integer> getAllIsOkLegitEventsFromDate(Date date);
+	
 	/**Returns legit events in int List.*/
 	public List<Integer> getLegitEventsIdFromDate(long from);
 	

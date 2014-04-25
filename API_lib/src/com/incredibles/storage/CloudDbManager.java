@@ -313,6 +313,46 @@ class CloudDbManager implements RecommenderDbService {
 		return eventList;
 	}
 
+	/*Returns legit events happening on the predefined DATE*/
+	public List<Integer> getAllIsOkLegitEventsFromDate(Date date){
+		PreparedStatement getEventStatement = null;
+		ResultSet eventResult = null;
+		Integer intDate = getIntegerDate(date.getTime());
+		List<Integer> eventList = new ArrayList<Integer>();
+		/*kula*/
+		String queryStr = "SELECT id FROM Events WHERE ((isOk=1 OR isOk=2 OR isOk=3) AND (SELECT EventId FROM EventDays WHERE EventDays.day >= ? AND Events.id = EventId LIMIT 1))";	
+		try {
+			getEventStatement = conn.prepareStatement(queryStr);
+			getEventStatement.setInt(1, intDate);
+			eventResult = getEventStatement.executeQuery();
+			while(eventResult.next()){
+				Integer eventID = eventResult.getInt("id");
+				eventList.add(eventID);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if (eventResult != null)  {
+				try {
+					eventResult.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (getEventStatement != null) {
+				try {
+					getEventStatement.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return eventList;
+	}
+	
 	/*Returns legit events in int List.*/
 	public List<Integer> getLegitEventsIdFromDate(long from){
 		List<Integer> eventIdList = new ArrayList<Integer>();
@@ -771,7 +811,7 @@ class CloudDbManager implements RecommenderDbService {
 		DateTimeZone zone = DateTimeZone.getDefault();
 		long utc = zone.convertLocalToUTC(local.getTime(), false);
 		Timestamp ts = new Timestamp(utc);
-		List<Integer> discriminiedEvents = getLegitEventsOnDate(local);
+		List<Integer> discriminiedEvents = getAllIsOkLegitEventsFromDate(local);
 		String queryStrUpdate = "UPDATE Events SET isOk = ?, updatedAt = ?, discriminator = ? WHERE id = ?";
 		try {
 			updateStatement = conn.prepareStatement(queryStrUpdate);
